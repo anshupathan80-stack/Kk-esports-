@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scalable=no, initial-scale=1.0, user-scalable=no">
     <title>KK ESPORTS - Player Arena</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2 family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- SWIPER CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -15,7 +15,7 @@
             --bg-secondary: #FFFFFF; /* Pure White Card Blocks */
             --text-primary: #1F2937; /* Clean Slate Dark Text */
             --text-secondary: #4B5563; /* Medium Grey Text */
-            --accent-primary: #2563EB; /* Premium Royal Blue Accent */
+            --accent-primary: #5D00FF; /* Premium Royal Purple Accent */
             --accent-secondary: #4F46E5; /* Indigo Accent */
             --accent-pink: #DB2777; /* Soft Pink Accent */
             --accent-red: #DC2626; /* Crimson Red Accent */
@@ -42,35 +42,40 @@
         /* PREMIUM LIGHT HEADER */
         .app-header { 
             position: fixed; top: 0; left: 0; width: 100%; height: 75px; 
-            background: var(--glass-bg); backdrop-filter: blur(15px);
+            background: #0B122F !important; /* Premium Dark Navy Background */
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 0 1rem; z-index: 1000; border-bottom: 2px solid var(--border-color); 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 0 1rem; z-index: 1000; border-bottom: 1.5px solid #1E293B !important; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
         .app-header .header-left { display: flex; align-items: center; gap: 1rem; width: calc(100% - 130px); }
-        .app-header .header-back-button { background: none; border: none; color: var(--text-primary); font-size: 1.4rem; display: none; }
-        .app-header .header-page-title { font-size: 1.25rem; font-weight: 800; display: none; background: linear-gradient(to right, var(--text-primary), var(--accent-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .app-header .header-back-button { background: none; border: none; color: #FFFFFF !important; font-size: 1.4rem; display: none; }
+        .app-header .header-page-title { font-size: 1.25rem; font-weight: 800; display: none; color: #FFFFFF !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .user-info { display: flex; align-items: center; gap: 0.75rem; }
+        
         .user-avatar { 
             width: 44px; height: 44px; border-radius: 50%; 
-            background-color: var(--accent-primary); 
-            border: 2px solid var(--accent-primary); 
-            box-shadow: 0 0 12px rgba(37, 99, 235, 0.2);
+            background-color: #2563EB; 
+            border: 2px solid #EF4444 !important; /* Glowing Red Border on Avatar */
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
             display: flex; justify-content: center; align-items: center; 
             font-weight: 800; font-size: 1.15rem; color: #FFFFFF; 
             text-transform: uppercase; 
             overflow: hidden;
         }
-        .welcome-text h2 { font-size: 0.95rem; font-weight: 600; margin: 0; color: var(--text-primary); }
-        .welcome-text p { font-size: 0.75rem; color: var(--text-secondary); margin: 0; }
+        .welcome-text h2 { font-size: 0.72rem; font-weight: 500; margin: 0; color: #94A3B8 !important; }
+        .welcome-text p { font-size: 1.05rem; font-weight: 700; color: #FFFFFF !important; margin: 0; text-transform: uppercase; }
+        
+        /* White Rounded Pill Wallet Chip */
         .wallet-button { 
             display: flex; align-items: center; gap: 0.5rem; 
-            background: linear-gradient(135deg, var(--accent-pink), var(--accent-red)); 
-            padding: 0.5rem 0.9rem; border-radius: 50px; 
-            font-weight: 800; font-size: 0.85rem; border: none; color: white; 
-            text-decoration: none; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+            background: #FFFFFF !important; /* Pure White background */
+            padding: 0.45rem 1rem; border-radius: 50px; 
+            font-weight: 800; font-size: 0.9rem; border: none; 
+            color: #0F172A !important; /* Dark text inside */
+            text-decoration: none; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        .wallet-button .plus-icon { background-color: #fff; color: var(--accent-red); border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; font-weight: bold; }
+        .wallet-button .plus-icon { display: none !important; } /* Hide plus icon to match screenshot */
         
         /* UNIQUE PREMIUM GOLD COIN EMBED STYLING */
         .game-coin {
@@ -279,7 +284,7 @@
 
         /* LOADER / SPLASH SCREEN WRAPPER WITH SMOOTH FADE TRANSITION */
         #globalLoaderEl { 
-            background: var(--bg-primary); 
+            background: #000000 !important; /* Solid Black Background for Splash screen */
             display: flex; 
             position: fixed; 
             top: 0; left: 0; 
@@ -289,8 +294,7 @@
             align-items: center;
             transition: opacity 0.5s ease, visibility 0.5s ease;
         }
-        .fancy-spinner { width: 5rem; height: 5rem; border-radius: 50%; border: 3px solid var(--border-color); border-top-color: var(--accent-primary); animation: spin 1s ease-in-out infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .fancy-spinner { display: none !important; } /* Spinner Hidden to Match Screenshots */
         
         .btn-glow { background: linear-gradient(135deg, var(--accent-primary), #1D4ED8); border: none; color: #FFFFFF; font-weight: 800; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); border-radius: 8px; }
         .btn-glow:hover { transform: scale(1.01); color: #FFFFFF; }
@@ -352,11 +356,6 @@
         .form-label { color: var(--text-secondary) !important; font-weight: 500; }
         .form-control::placeholder { color: #9CA3AF !important; opacity: 1 !important; }
         
-        /* TYPOGRAPHIC DESIGN LOGO */
-        .logo-container-glow { display: inline-flex; flex-direction: column; justify-content: center; align-items: center; width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, #FFFFFF, #F3F4F6); border: 3px solid var(--accent-primary); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.15); user-select: none; margin-bottom: 1.5rem; }
-        .logo-text-title { font-size: 1.8rem; font-weight: 800; line-height: 1; color: var(--text-primary); text-shadow: 0 0 8px rgba(37, 99, 235, 0.15); letter-spacing: -1px; }
-        .logo-text-subtitle { font-size: 0.65rem; font-weight: 700; color: var(--accent-red); letter-spacing: 2px; margin-top: 2px; text-shadow: 0 0 5px rgba(220, 38, 38, 0.15); }
-
         .section-header h2 { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; letter-spacing: 0.5px; text-transform: uppercase; }
         .section-header p { font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
         
@@ -622,14 +621,78 @@
         }
         .or-divider:not(:empty)::before { margin-right: .8em; }
         .or-divider:not(:empty)::after { margin-left: .8em; }
+
+        /* CUSTOM MODERN LOGIN & SIGNUP PALETTE OVERRIDES */
+        #login-section {
+            background-color: #FFFFFF !important;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 10px;
+        }
+        .modern-auth-title-container {
+            text-align: left;
+            padding-left: 5px;
+            margin-bottom: 40px;
+        }
+        .modern-auth-title {
+            color: #5D00FF !important; /* Premium Indigo Purple */
+            font-size: 2.3rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+        .modern-input {
+            border-radius: 30px !important;
+            height: 52px !important;
+            padding: 0 24px !important;
+            border: 1px solid #E2E8F0 !important;
+            background-color: #FFFFFF !important;
+            font-size: 0.95rem !important;
+            color: #1E293B !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.01) !important;
+        }
+        .modern-input::placeholder {
+            color: #94A3B8 !important;
+            opacity: 1 !important;
+        }
+        .modern-btn {
+            border-radius: 30px !important;
+            height: 52px !important;
+            background: #5D00FF !important; /* Solid Violet Button */
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+            font-size: 1.05rem !important;
+            letter-spacing: 0.5px;
+            border: none !important;
+            text-transform: uppercase;
+            box-shadow: 0 6px 20px rgba(93, 0, 255, 0.2) !important;
+            transition: all 0.2s ease;
+        }
+        .modern-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(93, 0, 255, 0.3) !important;
+        }
+        .modern-auth-footer {
+            margin-top: 30px;
+            font-size: 0.92rem;
+            color: #64748B;
+        }
+        .modern-auth-link {
+            color: #5D00FF !important;
+            font-weight: 700;
+            text-decoration: none !important;
+        }
     </style>
 </head>
 <body>
 
     <!-- UPDATED FADE-IN SPLASH WELCOME BANNERS & LOGO (INSTANT 0ms CACHE & ERROR-SAFE RECOVERY) -->
     <div id="globalLoaderEl">
-        <div id="splashScreenContainer" style="width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;">
-            <img id="splashScreenImg" src="" alt="Welcome" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+        <div id="splashScreenContainer" style="width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; margin:0; padding:0;">
+            <img id="splashScreenImg" src="" alt="Welcome" style="width: 100vw; height: 100vh; object-fit: cover; display: none; margin:0; padding:0; border:none;">
             <div id="splashDefaultSpinner" class="fancy-spinner"></div>
         </div>
     </div>
@@ -649,7 +712,6 @@
         <a href="#" class="wallet-button" id="headerWalletChip">
             <span class="game-coin" style="margin: 0;"></span>
             <span id="headerChipBalance">0.00</span>
-            <span class="plus-icon">+</span>
         </a>
     </header>
 
@@ -920,62 +982,68 @@
             let content = '';
             if (sectionId === 'login-section') {
                 content = `
-                    <div class="container" style="max-width: 450px; margin-top: 5vh;">
-                        <div class="text-center mb-4">
-                            <div class="logo-container-glow">
-                                <div class="logo-text-title">KK</div>
-                                <div class="logo-text-subtitle">ESPORTS</div>
+                    <div class="container" style="max-width: 450px; width: 100%;">
+                        <form id="emailLoginForm">
+                            <div class="modern-auth-title-container">
+                                <h1 class="modern-auth-title">Welcome to,</h1>
+                                <h1 class="modern-auth-title">Login</h1>
                             </div>
-                        </div>
-                        <div class="card custom-card"> <div class="card-body p-4">
-                            <form id="emailLoginForm">
-                                <h2 class="card-title text-center mb-4 text-dark fw-bold">Login</h2>
-                                <div class="mb-3">
-                                    <label for="loginEmailInputEl" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="loginEmailInputEl" placeholder="Enter Gmail Address" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="loginPasswordInputEl" class="form-label">Password</label>
-                                    <input type="password" class="form-control" id="loginPasswordInputEl" placeholder="Enter Password" required>
-                                </div>
-                                <div id="loginStatusMessageEl" class="alert mt-3" style="display: none;"></div>
-                                <div class="d-grid"><button type="button" id="loginEmailBtnEl" class="btn" style="background-color: var(--accent-pink); color: white; font-weight:700;">Login</button></div>
-                                <button type="button" id="forgotPasswordBtnEl" class="btn btn-link d-block text-center mt-2 text-decoration-none small text-secondary" style="font-size: 0.8rem;">Forgot Password?</button>
-                                <button type="button" id="showSignupToggleBtnEl" class="btn btn-link d-block text-center mt-1 text-decoration-none" style="color: var(--accent-primary); font-weight:600;">Need an account? Sign Up</button>
-                            </form>
-                            <form id="emailSignupForm" style="display: none;">
-                                <h2 class="card-title text-center mb-4 text-dark fw-bold">Sign Up</h2>
-                                <div class="mb-3">
-                                    <label for="signupNameInputEl" class="form-label">Full Name</label>
-                                    <input type="text" class="form-control" id="signupNameInputEl" placeholder="Enter Full Name" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="signupPhoneInputEl" class="form-label">Phone Number</label>
-                                    <input type="tel" class="form-control" id="signupPhoneInputEl" placeholder="Enter 10-Digit Mobile Number" required maxlength="10">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="signupEmailInputEl" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="signupEmailInputEl" placeholder="Enter Gmail Address" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="signupPasswordInputEl" class="form-label">Password</label>
-                                    <input type="password" class="form-control" id="signupPasswordInputEl" placeholder="Enter Password" required>
-                                </div>
-                                <div id="signupStatusMessageEl" class="alert mt-3" style="display: none;"></div>
-                                <div class="d-grid"><button type="button" id="signupEmailBtnEl" class="btn" style="background-color: var(--accent-primary); color: white; font-weight:700;">Sign Up</button></div>
-                                <button type="button" id="showLoginToggleBtnEl" class="btn btn-link d-block text-center mt-2 text-decoration-none" style="color: var(--accent-primary); font-weight:600;">Already have an account? Login</button>
-                            </form>
                             
-                            <div id="googleAuthContainer">
-                                <div class="text-center my-3 text-secondary" style="font-size: 0.85rem;">OR</div>
-                                <div class="d-grid">
-                                    <button type="button" id="loginGoogleBtnEl" class="btn btn-outline-dark text-dark" style="border-color: var(--border-color); background-color: rgba(0,0,0,0.02); font-weight:600;">
-                                        <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google Logo" style="width: 18px; margin-right: 8px;">
-                                        Continue with Google
-                                    </button>
-                                </div>
+                            <div class="mb-3">
+                                <input type="email" class="form-control modern-input" id="loginEmailInputEl" placeholder="Username / Email" required>
                             </div>
-                        </div></div>
+                            <div class="mb-3">
+                                <input type="password" class="form-control modern-input" id="loginPasswordInputEl" placeholder="Password" required>
+                            </div>
+                            
+                            <div id="loginStatusMessageEl" class="alert mt-3" style="display: none;"></div>
+                            <div class="d-grid mt-4">
+                                <button type="button" id="loginEmailBtnEl" class="btn modern-btn">Login</button>
+                            </div>
+                            <div class="text-center modern-auth-footer">
+                                Don't have an account? <a href="#" id="showSignupToggleBtnEl" class="modern-auth-link">Sign Up</a>
+                            </div>
+                        </form>
+                        <form id="emailSignupForm" style="display: none;">
+                            <div class="modern-auth-title-container">
+                                <h1 class="modern-auth-title">Welcome to,</h1>
+                                <h1 class="modern-auth-title">Sign Up</h1>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <input type="text" class="form-control modern-input" id="signupFirstNameInputEl" placeholder="First Name" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" class="form-control modern-input" id="signupLastNameInputEl" placeholder="Last Name" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" class="form-control modern-input" id="signupUsernameInputEl" placeholder="Username" required>
+                            </div>
+                            <div class="mb-3 d-flex gap-2">
+                                <select class="form-select modern-input" style="max-width: 90px; padding: 0 10px !important; text-align: center;" id="signupCountryCode">
+                                    <option value="+91">+91</option>
+                                    <option value="+1">+1</option>
+                                </select>
+                                <input type="tel" class="form-control modern-input flex-grow-1" id="signupPhoneInputEl" placeholder="Mobile" required maxlength="10">
+                            </div>
+                            <div class="mb-3">
+                                <input type="email" class="form-control modern-input" id="signupEmailInputEl" placeholder="Email" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="password" class="form-control modern-input" id="signupPasswordInputEl" placeholder="Password" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" class="form-control modern-input" id="signupReferralInputEl" placeholder="Referral Code">
+                            </div>
+                            
+                            <div id="signupStatusMessageEl" class="alert mt-3" style="display: none;"></div>
+                            <div class="d-grid mt-4">
+                                <button type="button" id="signupEmailBtnEl" class="btn modern-btn">Sign Up</button>
+                            </div>
+                            <div class="text-center modern-auth-footer">
+                                Have an account? <a href="#" id="showLoginToggleBtnEl" class="modern-auth-link">Sign In</a>
+                            </div>
+                        </form>
                     </div>`;
             } else if (sectionId === 'home-section') {
                 content = `
@@ -1557,13 +1625,7 @@
                     // APPLY THE THEME RECEIVED DYNAMICALLY FROM ADMIN DATABASE
                     applyDynamicTheme(appSettings);
                     
-                    const loginLogoEl = getElement('loginLogoEl');
-                    if (loginLogoEl && appSettings.userAppLogoUrl) {
-                        loginLogoEl.src = appSettings.userAppLogoUrl;
-                    }
-                    
                     const splashImg = getElement('splashScreenImg');
-                    const defaultSpinner = getElement('splashDefaultSpinner');
                     if (splashImg && appSettings.splashImageUrl) {
                         // Cache Splash URL in localStorage for instantaneous launch next time!
                         localStorage.setItem('cachedSplashImageUrl', appSettings.splashImageUrl);
@@ -1571,23 +1633,16 @@
                         // ASSIGN ONLOAD & ONERROR CALLBACKS BEFORE SETTING SRC KEY (PREVENTS CACHING RACE CONDITION)
                         splashImg.onload = () => {
                             splashImg.style.display = 'block';
-                            if (defaultSpinner) defaultSpinner.style.display = 'none';
-                            
-                            // Triggers dynamic hiding after load in case auth already loaded
                             splashImageProcessed = true;
                             checkAndHideSplash();
                         };
                         splashImg.onerror = () => {
-                            // Fallback safely to loading spinner if the image link is corrupt or broken
                             splashImg.style.display = 'none';
-                            if (defaultSpinner) defaultSpinner.style.display = 'block';
-                            
                             splashImageProcessed = true;
                             checkAndHideSplash();
                         };
                         splashImg.src = appSettings.splashImageUrl;
                     } else {
-                        // No splash set in database, fallback to processed
                         splashImageProcessed = true;
                         checkAndHideSplash();
                     }
@@ -2686,44 +2741,39 @@
                     }
                     finally { showLoader(false); }
                 };
-                
-                const forgotBtn = getElement('forgotPasswordBtnEl');
-                if (forgotBtn) {
-                    forgotBtn.onclick = async () => {
-                        const email = getElement('loginEmailInputEl').value.trim();
-                        if (!email) {
-                            showStatusMessage('loginStatusMessageEl', 'Please enter your email above to receive a reset link!');
-                            return;
-                        }
-                        showLoader(true);
-                        try {
-                            await sendPasswordResetEmail(auth, email);
-                            showStatusMessage('loginStatusMessageEl', 'Password reset link sent to your email! Please check spam folder too.', 'success');
-                        } catch (e) {
-                            showStatusMessage('loginStatusMessageEl', 'Failed to send reset link: ' + e.message);
-                        } finally {
-                            showLoader(false);
-                        }
-                    };
-                }
 
                 getElement('signupEmailBtnEl').onclick = async () => {
-                    const name = getElement('signupNameInputEl').value.trim();
+                    const name = getElement('signupFirstNameInputEl').value.trim();
+                    const lastName = getElement('signupLastNameInputEl').value.trim();
+                    const username = getElement('signupUsernameInputEl').value.trim();
                     const phone = getElement('signupPhoneInputEl').value.trim();
                     const email = getElement('signupEmailInputEl').value.trim();
                     const pass = getElement('signupPasswordInputEl').value;
+                    const refCode = getElement('signupReferralInputEl') ? getElement('signupReferralInputEl').value.trim() : "";
                     
-                    if(!name || !phone || !email || !pass) return showStatusMessage('signupStatusMessageEl', 'Please fill all fields.');
+                    if(!name || !lastName || !username || !phone || !email || !pass) return showStatusMessage('signupStatusMessageEl', 'Please fill all fields.');
                     if(phone.length !== 10 || isNaN(phone)) return showStatusMessage('signupStatusMessageEl', 'Please enter a valid 10-digit phone number.');
                     
                     showLoader(true);
                     try { 
                         const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                        await set(ref(db, `users/${cred.user.uid}`), { uid: cred.user.uid, displayName: name, phone: phone, email: email, balance: 0, totalKills: 0, totalWon: 0, createdAt: serverTimestamp() });
+                        const fullName = name + " " + lastName;
+                        await set(ref(db, `users/${cred.user.uid}`), { 
+                            uid: cred.user.uid, 
+                            displayName: fullName, 
+                            username: username,
+                            phone: phone, 
+                            email: email, 
+                            referralCode: refCode,
+                            balance: 0, 
+                            totalKills: 0, 
+                            totalWon: 0, 
+                            createdAt: serverTimestamp() 
+                        });
                         
                         await set(ref(db, `leaderboard/${cred.user.uid}`), {
                             uid: cred.user.uid,
-                            displayName: name,
+                            displayName: fullName,
                             balance: 0,
                             totalWon: 0,
                             profilePicUrl: ""
@@ -3169,18 +3219,16 @@
             });
         }
         
-        // 2 SECONDS MINIMUM SPLASH TIME TO ALLOW QUICK LAUNCH
+        // Clean flat 2.5 second splash display
         setTimeout(() => {
-            splashMinTimePassed = true;
-            checkAndHideSplash();
-        }, 2000);
-
-        // FAIL-SAFE MAX OVERLAY TIMEOUT: FORCES OVERLAY TO FADE OUT AFTER EXACTLY 2.5 SECONDS NO MATTER WHAT
-        setTimeout(() => {
-            splashMinTimePassed = true;
-            appInitialized = true;
-            splashImageProcessed = true;
-            checkAndHideSplash();
+            const loaderEl = getElement('globalLoaderEl');
+            if (loaderEl) {
+                loaderEl.style.opacity = '0';
+                loaderEl.style.visibility = 'hidden';
+                setTimeout(() => {
+                    loaderEl.style.display = 'none';
+                }, 500);
+            }
         }, 2500);
 
         document.addEventListener('DOMContentLoaded', async () => {
