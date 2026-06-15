@@ -360,7 +360,7 @@
         .section-header h2 { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; letter-spacing: 0.5px; text-transform: uppercase; }
         .section-header p { font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
         
-        /* NEW RICH TOURNAMENT FLOW STYLES */
+        /* NEW MATCH BANNER SYSTEM */
         .match-banner-container { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .detail-tab { color: var(--text-secondary); border-bottom: 3px solid transparent !important; transition: 0.3s; font-size: 0.85rem; letter-spacing: 0.5px; }
         .detail-tab.active { border-bottom-color: var(--accent-primary) !important; color: var(--accent-primary) !important; }
@@ -626,7 +626,7 @@
 </head>
 <body>
 
-    <!-- UPDATED FADE-IN SPLASH WELCOME BANNERS & LOGO (INSTANT 0ms CACHE & ERROR-SAFE RECOVERY) -->
+    <!-- UPDATED FADE-IN SPLASH WELCOME BANNERS & LOGO -->
     <div id="globalLoaderEl">
         <div id="splashScreenContainer" style="width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;">
             <img id="splashScreenImg" src="" alt="Welcome" style="width: 100%; height: 100%; object-fit: cover; display: none;">
@@ -666,6 +666,10 @@
         <section id="notifications-section" class="section"></section>
         <section id="tournaments-section" class="section"></section>
         
+        <!-- NEW SECTIONS FOR OUT-OF-BOX FEATURES -->
+        <section id="about-section" class="section"></section>
+        <section id="terms-section" class="section"></section>
+        
         <!-- RICH TOURNAMENT FLOW SECTIONS -->
         <section id="match-details-section" class="section"></section>
         <section id="position-selector-section" class="section"></section>
@@ -675,15 +679,37 @@
 
     <!-- NAVIGATION BAR AT THE BOTTOM -->
     <nav class="bottom-nav">
-        <a href="#" class="nav-item active" data-section="home-section"><i class="icon fas fa-home"></i><span>Home</span></a>
-        <a href="#" class="nav-item" data-section="leaderboard-section"><i class="icon fas fa-trophy"></i><span>Leaderboard</span></a>
-        <a href="#" class="nav-item" data-section="wallet-section"><i class="icon fas fa-wallet"></i><span>Wallet</span></a>
-        <a href="#" class="nav-item" data-section="profile-section"><i class="icon fas fa-user-circle"></i><span>Profile</span></a>
+        <a href="#" class="nav-item active" data-section="home-section"><i class="icon fas fa-home"></i><span id="navHomeLabel">Home</span></a>
+        <a href="#" class="nav-item" data-section="leaderboard-section"><i class="icon fas fa-trophy"></i><span id="navLeaderboardLabel">Leaderboard</span></a>
+        <a href="#" class="nav-item" data-section="wallet-section"><i class="icon fas fa-wallet"></i><span id="navWalletLabel">Wallet</span></a>
+        <a href="#" class="nav-item" data-section="profile-section"><i class="icon fas fa-user-circle"></i><span id="navProfileLabel">Profile</span></a>
     </nav>
     
     <!-- APP BOTTOM TOAST CONTAINER -->
     <div id="appToast" class="toast-container">
         <div class="toast-message" id="appToastMsg">Toast Message</div>
+    </div>
+
+    <!-- CHANGE LANGUAGE MODAL -->
+    <div class="modal fade" id="languageModal" tabindex="-1" aria-labelledby="languageModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border: 2px solid var(--accent-primary); border-radius: 16px; background-color: var(--bg-secondary); color: var(--text-primary);">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold" id="languageModalLabel" style="font-size: 1.1rem;">Select Language / भाषा चुनें</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: brightness(0.5);"></button>
+          </div>
+          <div class="modal-body pt-3">
+            <div class="d-grid gap-2">
+                <button class="btn btn-outline-primary text-start p-3 lang-option" data-lang="en" style="border-radius:12px; font-weight: 600;">
+                    <i class="fa-solid fa-circle-check me-2 d-none text-success"></i> English
+                </button>
+                <button class="btn btn-outline-primary text-start p-3 lang-option" data-lang="hi" style="border-radius:12px; font-weight: 600;">
+                    <i class="fa-solid fa-circle-check me-2 d-none text-success"></i> हिंदी (Hindi)
+                </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -704,7 +730,7 @@
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getDatabase, ref, get, set, serverTimestamp, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
         let app, db, auth;
         try {
@@ -727,7 +753,7 @@
         // PROFILE MENU BACK NAVIGATION STATE TRACKER
         let cameFromProfile = false;
 
-        // BATTLE JOINING MANAGEMENT SYSTEM VARIABLES (EXPLICITLY DECLARED TO PREVENT STRICT MODE ERRORS)
+        // BATTLE JOINING MANAGEMENT SYSTEM VARIABLES
         let activeJoinMatchId = null;
         let selectedTeamId = "";
         let selectedPositionId = "";
@@ -739,7 +765,62 @@
         // DYNAMIC SPLASH BANNERS STATE ENGINE
         let splashMinTimePassed = false;
         let appInitialized = false;
-        let splashImageProcessed = false; // NEW GUARD: Marks if splash image is loaded/processed
+        let splashImageProcessed = false;
+
+        // MULTI-LANGUAGE DICTIONARY ENGINE (FOR IN-BOX OPTIONS)
+        const appLang = localStorage.getItem('appLang') || 'en';
+        const i18n = {
+            en: {
+                welcomeBack: "Welcome Back,",
+                home: "Home",
+                leaderboard: "Leaderboard",
+                wallet: "Wallet",
+                profile: "Profile",
+                myWallet: "My Wallet",
+                myMatches: "My Matches",
+                myReferrals: "My Referrals",
+                announcements: "Announcements",
+                customerSupport: "Customer Support Help",
+                aboutUs: "About us",
+                shareApp: "Share App",
+                termsConditions: "Terms & Conditions",
+                changeLanguage: "Change Language",
+                logout: "Logout",
+                battlesPlayed: "Battles Played",
+                totalKills: "Total Kills",
+                totalWinnings: "Total Winnings",
+                submitTicket: "Submit Support Ticket",
+                issueCategory: "Issue Category",
+                yourMessage: "Your Message / Query",
+                submitBtn: "SUBMIT TICKET",
+                edit: "Edit"
+            },
+            hi: {
+                welcomeBack: "आपका स्वागत है,",
+                home: "होम",
+                leaderboard: "लीडरबोर्ड",
+                wallet: "वॉलेट",
+                profile: "प्रोफ़ाइल",
+                myWallet: "मेरा वॉलेट",
+                myMatches: "मेरे मैच",
+                myReferrals: "मेरे रेफ़रल",
+                announcements: "घोषणाएं",
+                customerSupport: "कस्टमर सपोर्ट",
+                aboutUs: "हमारे बारे में",
+                shareApp: "ऐप शेयर करें",
+                termsConditions: "नियम और शर्तें",
+                changeLanguage: "भाषा बदलें",
+                logout: "लॉगआउट",
+                battlesPlayed: "मैच खेले",
+                totalKills: "कुल किल्स",
+                totalWinnings: "कुल जीत",
+                submitTicket: "सपोर्ट टिकट सबमिट करें",
+                issueCategory: "समस्या की श्रेणी",
+                yourMessage: "आपका संदेश / प्रश्न",
+                submitBtn: "टिकट सबमिट करें",
+                edit: "बदलें"
+            }
+        };
 
         // Native Toast notification instead of standard popups (Video Style)
         let toastTimeout = null;
@@ -757,11 +838,11 @@
             }, 3000);
         }
 
-        // Secure Clipboard copy fallbacks for WebView wrapping
+        // Secure Clipboard copy fallbacks
         function copyText(text) {
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
-                    showToast("Copied to clipboard!");
+                    showToast(appLang === 'hi' ? "क्लिपबोर्ड पर कॉपी हो गया!" : "Copied to clipboard!");
                 }).catch(() => fallbackCopy(text));
             } else {
                 fallbackCopy(text);
@@ -774,7 +855,7 @@
             temp.select();
             document.execCommand('copy');
             document.body.removeChild(temp);
-            showToast("Copied to clipboard!");
+            showToast(appLang === 'hi' ? "क्लिपबोर्ड पर कॉपी हो गया!" : "Copied to clipboard!");
         }
 
         // CONTROL OVERLAY FADE LOGIC TO PREVENT ABRUPT UNMASKING
@@ -786,7 +867,7 @@
                     loaderEl.style.visibility = 'hidden';
                     setTimeout(() => {
                         loaderEl.style.display = 'none';
-                    }, 500); // 500ms CSS opacity transitions
+                    }, 500);
                 }
             }
         }
@@ -795,7 +876,6 @@
             const loaderEl = getElement('globalLoaderEl');
             if (!loaderEl) return;
             if (show) {
-                // Return to static spinner view ONLY if splash screen boot has already completed!
                 if (appInitialized) {
                     const splashImg = getElement('splashScreenImg');
                     const defaultSpinner = getElement('splashDefaultSpinner');
@@ -827,23 +907,23 @@
                 case 'auth/invalid-login-credentials':
                 case 'auth/wrong-password':
                 case 'auth/user-not-found':
-                    return "Wrong Password!"; 
+                    return appLang === 'hi' ? "गलत पासवर्ड!" : "Wrong Password!"; 
                 case 'auth/invalid-email':
-                    return "Invalid Email format!";
+                    return appLang === 'hi' ? "अमान्य ईमेल प्रारूप!" : "Invalid Email format!";
                 case 'auth/email-already-in-use':
-                    return "This Email is already registered!";
+                    return appLang === 'hi' ? "यह ईमेल पहले से पंजीकृत है!" : "This Email is already registered!";
                 case 'auth/weak-password':
-                    return "Password must be at least 6 characters.";
+                    return appLang === 'hi' ? "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।" : "Password must be at least 6 characters.";
                 case 'auth/network-request-failed':
-                    return "Network error! Please check connection.";
+                    return appLang === 'hi' ? "नेटवर्क त्रुटि! कृपया कनेक्शन जांचें।" : "Network error! Please check connection.";
                 case 'auth/too-many-requests':
-                    return "Access blocked temporarily due to many attempts.";
+                    return appLang === 'hi' ? "अस्थायी रूप से अवरुद्ध! कृपया बाद में प्रयास करें।" : "Access blocked temporarily due to many attempts.";
                 default:
-                    return "Wrong Password!";
+                    return appLang === 'hi' ? "गलत पासवर्ड!" : "Wrong Password!";
             }
         }
 
-        // GLOBAL DYNAMIC 100% FREE IMGBB UPLOADER (REPLACES PAID FIREBASE STORAGE)
+        // GLOBAL DYNAMIC 100% FREE IMGBB UPLOADER
         async function uploadImageToImgBB(file) {
             const formData = new FormData();
             formData.append('image', file);
@@ -859,7 +939,7 @@
             }
         }
 
-        // DYNAMIC PALETTE COMPILER: Changes CSS Variables on the document root in real-time
+        // DYNAMIC PALETTE COMPILER: Changes CSS Variables
         function applyDynamicTheme(settings) {
             const root = document.documentElement;
             if (!root || !settings) return;
@@ -869,14 +949,13 @@
             if (settings.backgroundColor) {
                 root.style.setProperty('--bg-primary', settings.backgroundColor);
                 
-                // Intelligently toggle secondary colors and card backgrounds based on dark/light scheme
                 if (settings.appTheme && (settings.appTheme === 'dark' || settings.appTheme === 'cyberpunk' || settings.appTheme === 'toxic')) {
-                    root.style.setProperty('--bg-secondary', '#1E293B'); // Elegant slate card
+                    root.style.setProperty('--bg-secondary', '#1E293B');
                     root.style.setProperty('--border-color', '#334155');
                     root.style.setProperty('--glass-bg', 'rgba(30, 41, 59, 0.95)');
                     root.style.setProperty('--text-primary', '#F8FAFC');
                 } else if (settings.appTheme === 'light') {
-                    root.style.setProperty('--bg-secondary', '#FFFFFF'); // Clean white card
+                    root.style.setProperty('--bg-secondary', '#FFFFFF');
                     root.style.setProperty('--border-color', '#E5E7EB');
                     root.style.setProperty('--glass-bg', 'rgba(255, 255, 255, 0.95)');
                     root.style.setProperty('--text-primary', '#1F2937');
@@ -885,7 +964,6 @@
             if (settings.textColor) root.style.setProperty('--text-primary', settings.textColor);
         }
 
-        // DYNAMIC ROOM ID / PASSWORD RELEASE TIME CALCULATOR
         function calculateRoomReleaseTimes(dateTimeStr) {
             if (!dateTimeStr) return { release: "5 mins before", wait: "5 mins after" };
             try {
@@ -912,6 +990,24 @@
             }
         }
 
+        // UPDATE STATIC TEXTS BY LOCALE
+        function applyAppLanguageLabels() {
+            const welcomeBackEl = getElement('headerWelcomeText');
+            if (welcomeBackEl) welcomeBackEl.textContent = i18n[appLang].welcomeBack;
+            
+            const navHome = getElement('navHomeLabel');
+            if (navHome) navHome.textContent = i18n[appLang].home;
+
+            const navLb = getElement('navLeaderboardLabel');
+            if (navLb) navLb.textContent = i18n[appLang].leaderboard;
+
+            const navWl = getElement('navWalletLabel');
+            if (navWl) navWl.textContent = i18n[appLang].wallet;
+
+            const navPr = getElement('navProfileLabel');
+            if (navPr) navPr.textContent = i18n[appLang].profile;
+        }
+
         function renderPageContent(sectionId) {
             const section = getElement(sectionId);
             if (!section || section.innerHTML.trim() !== '') return;
@@ -921,9 +1017,7 @@
                 content = `
                     <div class="container" style="max-width: 450px; margin-top: 4vh; padding-top: 10px;">
                         <div class="text-center mb-3">
-                            <!-- Attractive Welcome Greeting -->
                             <h3 class="fw-bold mb-3" style="font-size: 1.6rem; color: var(--text-primary); letter-spacing: -0.5px;">WELCOME TO <span style="color: var(--accent-primary);">KK ESPORTS</span></h3>
-                            <!-- Dynamic App Logo with Custom Dynamic Sizing and Fallback option -->
                             <img id="loginLogoEl" src="" alt="KK ESPORTS" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--accent-primary); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.25); object-fit: cover; display: none;">
                             <div id="loginLogoFallback" class="logo-container-glow" style="margin-top: 10px; margin-bottom: 1rem;">
                                 <div class="logo-text-title">KK</div>
@@ -932,7 +1026,7 @@
                         </div>
                         <div class="card custom-card"> <div class="card-body p-4">
                             <form id="emailLoginForm">
-                                <h2 class="card-title text-center mb-4 text-dark fw-bold">Login</h2>
+                                <h2 class="card-title text-center mb-4 text-dark fw-bold">${appLang === 'hi' ? 'लॉगिन' : 'Login'}</h2>
                                 <div class="mb-3">
                                     <label for="loginEmailInputEl" class="form-label">Email</label>
                                     <input type="email" class="form-control" id="loginEmailInputEl" placeholder="Enter Gmail Address" required>
@@ -946,7 +1040,7 @@
                                 <button type="button" id="showSignupToggleBtnEl" class="btn btn-link d-block text-center mt-2 text-decoration-none" style="color: var(--accent-primary); font-weight:600;">Need an account? Sign Up</button>
                             </form>
                             <form id="emailSignupForm" style="display: none;">
-                                <h2 class="card-title text-center mb-4 text-dark fw-bold">Sign Up</h2>
+                                <h2 class="card-title text-center mb-4 text-dark fw-bold">${appLang === 'hi' ? 'साइन अप' : 'Sign Up'}</h2>
                                 <div class="mb-3">
                                     <label for="signupNameInputEl" class="form-label">Full Name</label>
                                     <input type="text" class="form-control" id="signupNameInputEl" placeholder="Enter Full Name" required>
@@ -975,11 +1069,11 @@
                     <div id="homeAnnounceBanner" class="alert py-2 px-3 mb-4 d-flex align-items-center gap-2 border-0" style="background-color: #E0F2FE; color: #0369A1; border-radius:12px; display: none !important;">
                         <i class="fa-solid fa-bullhorn" style="color: #0369A1;"></i>
                         <div class="small fw-semibold text-truncate flex-grow-1" id="homeAnnounceText">Loading news...</div>
-                        <a href="#" class="small text-decoration-none fw-bold" style="color: #0369A1;" onclick="showSection('notifications-section')">View</a>
+                        <a href="#" class="small text-decoration-none fw-bold" style="color: #0369A1;" onclick="showSection('notifications-section')">${appLang === 'hi' ? 'देखें' : 'View'}</a>
                     </div>
 
                     <div class="my-contests">
-                        <div class="section-header"><h2>My Matches</h2><p>Your Tournaments Journey</p></div>
+                        <div class="section-header"><h2>${appLang === 'hi' ? 'मेरे मैच' : 'My Matches'}</h2><p>Your Tournaments Journey</p></div>
                         <div class="contest-categories">
                             <div class="category-card" data-status-target="upcoming"><div class="icon"><i class="fas fa-clock text-info"></i></div><span>Upcoming</span></div>
                             <div class="category-card" data-status-target="ongoing"><div class="icon"><i class="fas fa-play-circle text-danger"></i></div><span>Ongoing</span></div>
@@ -988,51 +1082,56 @@
                     </div>
                     
                     <div class="exclusive-tournaments">
-                        <div class="section-header"><h2>Game Categories</h2><p>Select a game to see matches</p></div>
+                        <div class="section-header"><h2>${appLang === 'hi' ? 'गेम श्रेणियां' : 'Game Categories'}</h2><p>Select a game to see matches</p></div>
                         <div class="game-list" id="gamesListEl"></div>
                     </div>`;
             } else if (sectionId === 'profile-section') {
                 content = `
                     <div class="profile-card">
                         <div class="profile-avatar" id="profileCardAvatar" style="cursor: pointer; position: relative;"></div>
-                        <!-- HIDDEN CHOOSE FILE INPUT TARGET FOR UPLOAD -->
                         <input type="file" id="profilePicFileInput" accept="image/*" style="display: none;">
                         <div class="profile-info">
                             <h3 id="profileCardName">Username</h3>
                             <p id="profileCardPhone"><span></span><i class="fa-solid fa-eye ms-2"></i></p>
                         </div>
-                        <a href="#" class="profile-edit-btn" id="editProfileBtn">Edit</a>
+                        <a href="#" class="profile-edit-btn" id="editProfileBtn">${i18n[appLang].edit}</a>
                     </div>
                     
                     <div class="profile-metrics-row">
                         <div class="metric-block">
                             <h4 id="profilePlayedText">0</h4>
-                            <span>Battles Played</span>
+                            <span>${i18n[appLang].battlesPlayed}</span>
                         </div>
                         <div class="metric-block">
                             <h4 id="profileKillsText" style="color:var(--accent-pink);">0</h4>
-                            <span>Total Kills</span>
+                            <span>${i18n[appLang].totalKills}</span>
                         </div>
                         <div class="metric-block">
                             <h4 id="profileWinningsText" style="color:var(--accent-primary);"><span class="game-coin" style="margin: 0 4px 0 0;"></span>0</h4>
-                            <span>Total Winnings</span>
+                            <span>${i18n[appLang].totalWinnings}</span>
                         </div>
                     </div>
 
                     <div class="profile-menu">
-                        <a href="#" class="menu-item" data-section="wallet-section"><i class="icon fa-solid fa-wallet"></i><span>My Wallet</span><i class="chevron fa-solid fa-chevron-right"></i></a>
-                        <a href="#" class="menu-item" data-section="history-section"><i class="icon fa-solid fa-gamepad"></i><span>My Matches</span><i class="chevron fa-solid fa-chevron-right"></i></a>
-                        <a href="#" class="menu-item" data-section="earn-section"><i class="icon fa-solid fa-users"></i><span>My Referrals</span><i class="chevron fa-solid fa-chevron-right"></i></a>
-                        <a href="#" class="menu-item" data-section="notifications-section"><i class="icon fa-solid fa-bullhorn"></i><span>Announcements</span><i class="chevron fa-solid fa-chevron-right"></i></a>
-                        <a href="#" class="menu-item" id="customerSupportBtn"><i class="icon fa-solid fa-headset"></i><span>Customer Support Help</span><i class="chevron fa-solid fa-chevron-right"></i></a>
+                        <a href="#" class="menu-item" data-section="wallet-section"><i class="icon fa-solid fa-wallet"></i><span>${i18n[appLang].myWallet}</span><i class="chevron fa-solid fa-chevron-right"></i></a>
+                        <a href="#" class="menu-item" data-section="history-section"><i class="icon fa-solid fa-gamepad"></i><span>${i18n[appLang].myMatches}</span><i class="chevron fa-solid fa-chevron-right"></i></a>
+                        <a href="#" class="menu-item" data-section="earn-section"><i class="icon fa-solid fa-users"></i><span>${i18n[appLang].myReferrals}</span><i class="chevron fa-solid fa-chevron-right"></i></a>
+                        <a href="#" class="menu-item" data-section="notifications-section"><i class="icon fa-solid fa-bullhorn"></i><span>${i18n[appLang].announcements}</span><i class="chevron fa-solid fa-chevron-right"></i></a>
+                        <a href="#" class="menu-item" id="customerSupportBtn"><i class="icon fa-solid fa-headset"></i><span>${i18n[appLang].customerSupport}</span><i class="chevron fa-solid fa-chevron-right"></i></a>
+                        
+                        <!-- ADDED NEW MARKED OPTIONS FROM SCREENSHOT -->
+                        <a href="#" class="menu-item" data-section="about-section"><i class="icon fa-solid fa-circle-info"></i><span>${i18n[appLang].aboutUs}</span><i class="chevron fa-solid fa-chevron-right"></i></a>
+                        <a href="#" class="menu-item" id="shareAppBtn"><i class="icon fa-solid fa-share-nodes"></i><span>${i18n[appLang].shareApp}</span><i class="chevron fa-solid fa-chevron-right"></i></a>
+                        <a href="#" class="menu-item" data-section="terms-section"><i class="icon fa-solid fa-file-contract"></i><span>${i18n[appLang].termsConditions}</span><i class="chevron fa-solid fa-chevron-right"></i></a>
+                        <a href="#" class="menu-item" id="changeLanguageBtn"><i class="icon fa-solid fa-language"></i><span>${i18n[appLang].changeLanguage}</span><i class="chevron fa-solid fa-chevron-right"></i></a>
                     </div>
 
                     <div class="card custom-card mt-4">
                         <div class="card-body">
-                            <h5 class="text-dark fw-bold mb-3"><i class="fa-solid fa-headset text-info me-2"></i>Submit Support Ticket</h5>
+                            <h5 class="text-dark fw-bold mb-3"><i class="fa-solid fa-headset text-info me-2"></i>${i18n[appLang].submitTicket}</h5>
                             <form id="supportTicketForm">
                                 <div class="mb-3">
-                                    <label class="form-label text-secondary small">Issue Category</label>
+                                    <label class="form-label text-secondary small">${i18n[appLang].issueCategory}</label>
                                     <select id="ticketCategory" class="form-select">
                                         <option value="Deposit Issue">Deposit Issue</option>
                                         <option value="Withdrawal Issue">Withdrawal Issue</option>
@@ -1041,15 +1140,15 @@
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label text-secondary small">Your Message / Query</label>
-                                    <textarea id="ticketMessage" class="form-control" rows="3" placeholder="Explain your issue in detail..." required></textarea>
+                                    <label class="form-label text-secondary small">${i18n[appLang].yourMessage}</label>
+                                    <textarea id="ticketMessage" class="form-control" rows="3" placeholder="Explain your issue..." required></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-glow w-100 py-2">SUBMIT TICKET</button>
+                                <button type="submit" class="btn btn-glow w-100 py-2">${i18n[appLang].submitBtn}</button>
                             </form>
                         </div>
                     </div>
 
-                    <button class="logout-btn" id="logoutBtn">Logout</button>`;
+                    <button class="logout-btn" id="logoutBtn">${i18n[appLang].logout}</button>`;
             } else if (sectionId === 'tournaments-section') {
                 content = `
                     <div class="tournament-tabs">
@@ -1154,7 +1253,6 @@
                         <div class="card-body">
                             <h5 class="text-dark fw-bold mb-3"><i class="fa-solid fa-money-bill-transfer text-danger me-2"></i>Withdraw Money</h5>
                             
-                            <!-- WITHDRAWABLE WINNINGS ONLY INDICATOR CARD -->
                             <div class="p-3 mb-3 rounded-4 bg-light border text-center" style="border-color: var(--border-color) !important;">
                                 <span class="text-secondary small d-block mb-1">Withdrawable Winnings Balance</span>
                                 <h4 class="text-success fw-bold mb-0 d-flex align-items-center justify-content-center gap-1"><span class="game-coin" style="margin: 0 4px 0 0;"></span><span id="withdrawPageWinnings">0.00</span></h4>
@@ -1234,7 +1332,62 @@
                     </div>
                 `;
             } 
-            // 5-STEP RICH BATTLE DETAIL PANEL TEMPLATES
+            // BRAND NEW MARKED SECTIONS FROM SCREENSHOT (DESIGN INTEGRATED)
+            else if (sectionId === 'about-section') {
+                content = `
+                    <div class="card custom-card text-center p-4">
+                        <div class="logo-container-glow mb-3">
+                            <div class="logo-text-title">KK</div>
+                            <div class="logo-text-subtitle">ESPORTS</div>
+                        </div>
+                        <h4 class="fw-bold mb-1" style="font-size: 1.35rem; color: var(--text-primary);">${appLang === 'hi' ? 'KK एस्पोर्ट्स के बारे में' : 'About KK Esports'}</h4>
+                        <p class="text-secondary small mb-4">App Version 1.0.8</p>
+                        
+                        <p class="text-secondary small text-start mb-3" style="line-height: 1.6;">
+                            ${appLang === 'hi' 
+                                ? '<strong>KK ESPORTS</strong> भारत का अग्रणी ऑनलाइन मोबाइल गेमिंग टूर्नामेंट प्लेटफॉर्म है। हमारा मिशन प्रत्येक गेमर को एक पारदर्शी, सुरक्षित और रोमांचकारी वातावरण प्रदान करना है जहां वे टूर्नामेंट में अपनी योग्यता साबित कर सकें और असली इनाम जीत सकें।'
+                                : 'Welcome to <strong>KK ESPORTS</strong>, India\'s premier competitive hub for mobile gamers. Our platform offers a seamless and highly secure arena to showcase your ultimate gaming expertise and claim rewarding victories.'}
+                        </p>
+                        <p class="text-secondary small text-start mb-4" style="line-height: 1.6;">
+                            ${appLang === 'hi'
+                                ? 'सुरक्षित भुगतान प्रणाली, 24/7 सक्रिय सपोर्ट और एंटी-हैक पॉलिसी के साथ, हम आपके ई-स्पोर्ट्स अनुभव को अगले स्तर तक ले जाने के लिए प्रतिबद्ध हैं।'
+                                : 'With lightning-fast withdrawals, real-time leaderboards, strict anti-hack integrity, and dedicated 24/7 support, we strive to build the safest play-and-earn ecosystem.'}
+                        </p>
+                        
+                        <hr class="my-4" style="border-color: var(--border-color);">
+                        
+                        <div class="d-flex justify-content-around text-secondary small">
+                            <div><i class="fa-solid fa-shield-halved text-success d-block mb-1 fs-5"></i>100% Secure</div>
+                            <div><i class="fa-solid fa-bolt text-warning d-block mb-1 fs-5"></i>Fast Pay</div>
+                            <div><i class="fa-solid fa-headset text-info d-block mb-1 fs-5"></i>Active Support</div>
+                        </div>
+                    </div>
+                `;
+            } else if (sectionId === 'terms-section') {
+                content = `
+                    <div class="card custom-card">
+                        <div class="card-body">
+                            <h4 class="fw-bold text-dark mb-3"><i class="fa-solid fa-file-contract text-primary me-2"></i>${appLang === 'hi' ? 'नियम और शर्तें' : 'Terms & Conditions'}</h4>
+                            <p class="text-secondary small mb-3">Please comply with these terms carefully before joining battles.</p>
+                            
+                            <div class="text-secondary small text-start overflow-auto pe-1" style="max-height: 420px; line-height: 1.65;">
+                                <h6 class="text-dark fw-bold mb-1">1. Account Eligibility</h6>
+                                <p class="mb-3">Only players aged 18 or above are permitted to participate in cash prize matches. Creating multiple accounts or fake registrations is strictly banned.</p>
+
+                                <h6 class="text-dark fw-bold mb-1">2. Anti-Cheat & Integrity</h6>
+                                <p class="mb-3">The use of emulators, hacks, modified configuration files, scripts, or outside assistance leads to immediate lifetime ban and forfeiture of all wallet balance.</p>
+
+                                <h6 class="text-dark fw-bold mb-1">3. Deposits & Proofs</h6>
+                                <p class="mb-3">Users must submit correct 12-digit UTR references or actual transaction proofs. Submitting fake screenshots or invalid UPI IDs will result in permanent blacklist.</p>
+
+                                <h6 class="text-dark fw-bold mb-1">4. Refund & Custom Rooms</h6>
+                                <p class="mb-3">Custom Room ID & Password will be shared inside the app before the game starts. Refunds will not be issued if a participant fails to enter the room on time.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            // RICH TOURNAMENT FLOW SECTIONS
             else if (sectionId === 'match-details-section') {
                 content = `
                     <div class="match-banner-container mb-3">
@@ -1250,9 +1403,7 @@
                             <button class="flex-grow-1 py-2 border-0 bg-transparent fw-bold detail-tab active" id="detailDescTabBtn">DESCRIPTION</button>
                             <button class="flex-grow-1 py-2 border-0 bg-transparent fw-bold detail-tab" id="detailMembersTabBtn">JOINED MEMBER</button>
                         </div>
-                        <div class="p-3" id="detailTabContentContainer">
-                            <!-- Dynamic Tab Content loaded in script -->
-                        </div>
+                        <div class="p-3" id="detailTabContentContainer"></div>
                     </div>
                     <button class="btn btn-glow w-100 py-2.5 fw-bold" id="detailJoinNextBtn">JOIN BATTLE</button>
                 `;
@@ -1264,16 +1415,12 @@
                             <i class="fa-solid fa-circle-info text-info me-1"></i> Pick a free slot checkbox to lock your position.
                         </div>
                         
-                        <!-- EXACT VIDEO STYLE SLOTS CHECKBOX GRID -->
-                        <div class="video-slots-checkbox-grid mb-3" id="videoSlotsCheckboxGrid">
-                            <!-- Generated Dynamically -->
-                        </div>
+                        <div class="video-slots-checkbox-grid mb-3" id="videoSlotsCheckboxGrid"></div>
                     </div>
                     <button class="btn btn-glow w-100 py-2.5 fw-bold" id="posSelectorNextBtn" disabled>JOIN NOW</button>
                 `;
             } else if (sectionId === 'confirm-joining-section') {
                 content = `
-                    <!-- EXACT VIDEO STYLE JOINING DIALOG CARD -->
                     <div class="video-joining-card-top">
                         <div class="video-joining-card-icon">
                             <i class="fa-solid fa-credit-card"></i>
@@ -1302,11 +1449,9 @@
                                         <td id="confirmTableTeam" class="text-dark fw-bold">-</td>
                                         <td id="confirmTablePos" class="text-dark fw-bold">-</td>
                                         <td>
-                                            <!-- Video Style Text Input directly inside slot table row for IGN -->
                                             <input type="text" id="confirmTableIgnInput" class="form-control text-center text-primary fw-bold border p-1" placeholder="Enter Name" style="font-size:0.85rem; border-radius:6px;">
                                         </td>
                                         <td>
-                                            <!-- Video Style Text Input directly inside slot table row for IGU (UID) -->
                                             <input type="text" id="confirmTableIguInput" class="form-control text-center text-danger fw-bold border p-1" placeholder="Enter UID" style="font-size:0.85rem; border-radius:6px;">
                                         </td>
                                     </tr>
@@ -1356,7 +1501,6 @@
             
             const isLoginPage = sectionId === 'login-section';
             
-            // Toggle the visibility of the app header on the login page
             const appHeader = document.querySelector('.app-header');
             if (appHeader) {
                 appHeader.style.display = isLoginPage ? 'none' : 'flex';
@@ -1389,13 +1533,15 @@
                 let pageTitle = sectionId.replace('-section', '').replace(/^\w/, c => c.toUpperCase());
                 if(sectionId === 'tournaments-section') {
                     const onlyJoined = data.onlyJoined || false;
-                    pageTitle = onlyJoined ? "My Matches" : "Tournaments";
+                    pageTitle = onlyJoined ? i18n[appLang].myMatches : "Tournaments";
                 }
                 if(sectionId === 'match-details-section') pageTitle = "Match Details";
                 if(sectionId === 'position-selector-section') pageTitle = "Select Match Position";
                 if(sectionId === 'confirm-joining-section') pageTitle = "Joining Match";
                 if(sectionId === 'deposit-section') pageTitle = "Deposit Wallet";
                 if(sectionId === 'withdrawal-section') pageTitle = "Withdraw Wallet";
+                if(sectionId === 'about-section') pageTitle = i18n[appLang].aboutUs;
+                if(sectionId === 'terms-section') pageTitle = i18n[appLang].termsConditions;
                 getElement('headerPageTitle').textContent = pageTitle;
             }
         }
@@ -1511,7 +1657,6 @@
             dbListeners = {};
         }
 
-        // WRAPPED WITH A GLOBAL TRY-CATCH-FINALLY ENGINE BLOCK TO PREVENT INTERRUPTING FADE LOADER TRANSITIONS
         async function handleAuthStateChange(user) {
             showLoader(true);
             try {
@@ -1533,9 +1678,8 @@
                 }
             } catch (e) {
                 console.error("Auth state change processing failed safely:", e);
-                showSection('login-section'); // Fallback to login
+                showSection('login-section');
             } finally {
-                // THE FINALLY BLOCK GUARANTEES THAT NO MATTER WHAT INTERNET/DB ERROR HAPPENS, THE SPLASH SCREEN WILL SECURELY FADE-OUT
                 appInitialized = true;
                 checkAndHideSplash();
             }
@@ -1547,26 +1691,21 @@
                 if (snapshot.exists()) {
                     appSettings = snapshot.val() || {};
                     
-                    // APPLY THE THEME RECEIVED DYNAMICALLY FROM ADMIN DATABASE
                     applyDynamicTheme(appSettings);
                     
                     const splashImg = getElement('splashScreenImg');
                     const defaultSpinner = getElement('splashDefaultSpinner');
                     if (splashImg && appSettings.splashImageUrl) {
-                        // Cache Splash URL in localStorage for instantaneous launch next time!
                         localStorage.setItem('cachedSplashImageUrl', appSettings.splashImageUrl);
                         
-                        // ASSIGN ONLOAD & ONERROR CALLBACKS BEFORE SETTING SRC KEY (PREVENTS CACHING RACE CONDITION)
                         splashImg.onload = () => {
                             splashImg.style.display = 'block';
                             if (defaultSpinner) defaultSpinner.style.display = 'none';
                             
-                            // Triggers dynamic hiding after load in case auth already loaded
                             splashImageProcessed = true;
                             checkAndHideSplash();
                         };
                         splashImg.onerror = () => {
-                            // Fallback safely to loading spinner if the image link is corrupt or broken
                             splashImg.style.display = 'none';
                             if (defaultSpinner) defaultSpinner.style.display = 'block';
                             
@@ -1575,7 +1714,6 @@
                         };
                         splashImg.src = appSettings.splashImageUrl;
                     } else {
-                        // No splash set in database, fallback to processed
                         splashImageProcessed = true;
                         checkAndHideSplash();
                     }
@@ -2646,7 +2784,6 @@
                 loadSuccessSection();
             }
             else if (sectionId === 'login-section') {
-                // Apply dynamic logo image from Database if present
                 const loginLogoEl = getElement('loginLogoEl');
                 const loginLogoFallback = getElement('loginLogoFallback');
                 if (loginLogoEl && appSettings.userAppLogoUrl) {
@@ -2662,7 +2799,7 @@
                     showLoader(true);
                     try { await signInWithEmailAndPassword(auth, email, pass); } 
                     catch (e) { 
-                        showStatusMessage('loginStatusMessageEl', "Wrong Password!"); 
+                        showStatusMessage('loginStatusMessageEl', appLang === 'hi' ? "गलत पासवर्ड या उपयोगकर्ता नाम!" : "Wrong Password!"); 
                     }
                     finally { showLoader(false); }
                 };
@@ -2697,7 +2834,7 @@
                     });
                 });
                 
-                // MULTIPLEXED FREE IMGBB AVATAR FILE BINDER (0% FIREBASE STORAGE OVERHEAD)
+                // MULTIPLEXED FREE IMGBB AVATAR FILE BINDER
                 const avatarBtn = getElement('profileCardAvatar');
                 const pFileInput = getElement('profilePicFileInput');
                 if (avatarBtn && pFileInput) {
@@ -2747,6 +2884,45 @@
                     e.preventDefault();
                     const supportUrl = appSettings.customerSupportUrl || "https://telegram.me/YourSupportChannel";
                     window.open(supportUrl, '_blank');
+                };
+
+                // BINDER FOR DYNAMIC SOCIAL APP SHARING
+                getElement('shareAppBtn').onclick = (e) => {
+                    e.preventDefault();
+                    const webLink = window.location.href;
+                    const inviteText = `🏆 Hey! Join me on KK ESPORTS, play custom battle tournaments, climb the leaderboard, and earn real-world reward coins!\n📲 Play Now: ${webLink}`;
+                    
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'KK ESPORTS',
+                            text: inviteText,
+                            url: webLink
+                        }).catch(() => {
+                            copyText(inviteText);
+                        });
+                    } else {
+                        copyText(inviteText);
+                    }
+                };
+
+                // LANGUAGE CHANGER SYSTEM WITH MODAL TRIGGER
+                getElement('changeLanguageBtn').onclick = (e) => {
+                    e.preventDefault();
+                    const bModal = new bootstrap.Modal(getElement('languageModal'));
+                    
+                    // Pre-highlight active language inside modal
+                    document.querySelectorAll('.lang-option').forEach(btn => {
+                        const icon = btn.querySelector('i');
+                        if (btn.dataset.lang === appLang) {
+                            btn.classList.add('active');
+                            if (icon) icon.classList.remove('d-none');
+                        } else {
+                            btn.classList.remove('active');
+                            if (icon) icon.classList.add('d-none');
+                        }
+                    });
+                    
+                    bModal.show();
                 };
 
                 getElement('supportTicketForm').onsubmit = async (e) => {
@@ -3018,7 +3194,6 @@
                 const codeEl = getElement('referralCodeEl');
                 if (codeEl) codeEl.textContent = code;
                 
-                // Dynamically load referral reward from settings
                 const refReward = appSettings.referralReward || 10;
                 const rewardTextEl = getElement('referralBonusTextVal');
                 if (rewardTextEl) {
@@ -3097,6 +3272,24 @@
                 cameFromProfile = false; 
                 showSection('wallet-section'); 
             });
+
+            // LANGUAGE OPTION CHOICE CLICK HANDLER
+            document.querySelectorAll('.lang-option').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    const chosenLang = opt.dataset.lang;
+                    localStorage.setItem('appLang', chosenLang);
+                    
+                    showToast(chosenLang === 'hi' ? "भाषा बदलकर हिंदी कर दी गई है!" : "Language switched to English!");
+                    
+                    const mInstance = bootstrap.Modal.getInstance(getElement('languageModal'));
+                    if (mInstance) mInstance.hide();
+                    
+                    // Force refresh to instantly rebuild menus with new localized tokens
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 800);
+                });
+            });
         }
         
         // 2 SECONDS MINIMUM SPLASH TIME TO ALLOW QUICK LAUNCH
@@ -3105,7 +3298,7 @@
             checkAndHideSplash();
         }, 2000);
 
-        // FAIL-SAFE MAX OVERLAY TIMEOUT: FORCES OVERLAY TO FADE OUT AFTER EXACTLY 2.5 SECONDS NO MATTER WHAT
+        // FAIL-SAFE MAX OVERLAY TIMEOUT
         setTimeout(() => {
             splashMinTimePassed = true;
             appInitialized = true;
@@ -3116,8 +3309,8 @@
         document.addEventListener('DOMContentLoaded', async () => {
             if(!auth) return;
             initializeGlobalEventListeners();
+            applyAppLanguageLabels(); // Apply language-specific nav tabs and greetings
             
-            // INSTANT 0ms SPLASH SCREEN CACHE LOAD LOGIC
             const cachedSplashUrl = localStorage.getItem('cachedSplashImageUrl');
             if (cachedSplashUrl) {
                 const splashImg = getElement('splashScreenImg');
