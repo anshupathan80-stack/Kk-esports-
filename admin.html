@@ -112,8 +112,7 @@
             <nav class="navbar w-100 h-100">
                 <div class="container d-flex justify-content-between align-items-center">
                     <a class="navbar-brand d-flex align-items-center gap-2" href="#">
-                        <img id="navLogo" src="" alt="Logo" style="width: 32px; height: 32px; object-fit: contain; border-radius: 5px; display: none;">
-                        <span>KK ESPORTS Admin Area</span>
+                        <img id="navLogo" src="" alt="Logo" style="width: 32px; height: 32px; object-fit: contain; border-radius: 5px; display: none;" onerror="this.style.display='none';">
                     </a>
                     <span class="text-secondary small d-none d-md-inline">Role: <strong class="text-danger">Super Admin</strong></span>
                     <button class="btn btn-outline-danger btn-sm" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</button>
@@ -395,852 +394,858 @@
             paneContainer.innerHTML = `<div class="d-flex justify-content-center p-5"><div class="spinner-border"></div></div>`;
             let content = '';
             
-            if (paneId === 'dashboardOverview') {
-                const [usersSnap, matchesSnap, ticketsSnap] = await Promise.all([
-                    get(ref(db, 'users')),
-                    get(ref(db, 'tournaments')),
-                    get(ref(db, 'support_tickets'))
-                ]);
+            try {
+                if (paneId === 'dashboardOverview') {
+                    const [usersSnap, matchesSnap, ticketsSnap] = await Promise.all([
+                        get(ref(db, 'users')),
+                        get(ref(db, 'tournaments')),
+                        get(ref(db, 'support_tickets'))
+                    ]);
 
-                const usersVal = usersSnap.exists() ? usersSnap.val() : {};
-                const totalUsers = Object.keys(usersVal).length;
-                const totalMatches = matchesSnap.exists() ? Object.keys(matchesSnap.val()).length : 0;
-                
-                let openTickets = 0;
-                if (ticketsSnap.exists()) {
-                    Object.values(ticketsSnap.val()).forEach(t => { if(t.status === 'open') openTickets++; });
-                }
+                    const usersVal = usersSnap.exists() ? usersSnap.val() : {};
+                    const totalUsers = Object.keys(usersVal).length;
+                    const totalMatches = matchesSnap.exists() ? Object.keys(matchesSnap.val()).length : 0;
+                    
+                    let openTickets = 0;
+                    if (ticketsSnap.exists()) {
+                        Object.values(ticketsSnap.val()).forEach(t => { if(t.status === 'open') openTickets++; });
+                    }
 
-                let pendingRequests = 0;
-                let totalWalletCoins = 0;
-                let totalDepositedCoins = 0;
-                let totalWithdrawnCoins = 0;
+                    let pendingRequests = 0;
+                    let totalWalletCoins = 0;
+                    let totalDepositedCoins = 0;
+                    let totalWithdrawnCoins = 0;
 
-                let userRows = '';
-                Object.entries(usersVal).forEach(([uid, u]) => {
-                    const avatarUrl = u.profilePicUrl || 'https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(u.displayName || 'Gamer');
-                    const bal = parseFloat(u.balance || 0);
-                    totalWalletCoins += bal;
+                    let userRows = '';
+                    Object.entries(usersVal).forEach(([uid, u]) => {
+                        const avatarUrl = u.profilePicUrl || 'https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(u.displayName || 'Gamer');
+                        const bal = parseFloat(u.balance || 0);
+                        totalWalletCoins += bal;
 
-                    userRows += `
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <img src="${avatarUrl}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
-                                    <div>
-                                        <span class="fw-bold">${u.displayName || 'No Name'}</span><br>
-                                        <small class="text-secondary" style="font-size: 0.72rem;">${u.email || 'N/A'}</small>
+                        userRows += `
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="${avatarUrl}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
+                                        <div>
+                                            <span class="fw-bold">${u.displayName || 'No Name'}</span><br>
+                                            <small class="text-secondary" style="font-size: 0.72rem;">${u.email || 'N/A'}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${u.phone || 'N/A'}</td>
+                                <td class="fw-bold text-success">₹${bal.toFixed(2)}</td>
+                                <td>${u.totalKills || 0}</td>
+                                <td class="fw-bold text-primary">₹${parseFloat(u.totalWon || 0).toFixed(2)}</td>
+                            </tr>`;
+
+                        if (u.transactions) {
+                            Object.values(u.transactions).forEach(tx => {
+                                if(tx.status === 'pending') pendingRequests++;
+                                
+                                const txAmt = parseFloat(tx.amount) || 0;
+                                if (tx.status === 'completed' || tx.status === 'approved') {
+                                    if (tx.type === 'deposit') {
+                                        totalDepositedCoins += txAmt;
+                                    } else if (tx.type === 'withdrawal') {
+                                        totalWithdrawnCoins += txAmt;
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+                    if (userRows === '') {
+                        userRows = `<tr><td colspan="5" class="text-center text-secondary py-3">No registered players yet.</td></tr>`;
+                    }
+
+                    content = `
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-3">
+                                <div class="card border-0 bg-primary text-white p-4">
+                                    <h6 class="small text-white-50 uppercase text-uppercase">Total Players</h6>
+                                    <h2 class="fw-bold mb-0">${totalUsers}</h2>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-0 bg-success text-white p-4">
+                                    <h6 class="small text-white-50 text-uppercase">Total Matches</h6>
+                                    <h2 class="fw-bold mb-0">${totalMatches}</h2>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-0 bg-warning text-dark p-4">
+                                    <h6 class="small text-dark-50 text-uppercase">Pending Payments</h6>
+                                    <h2 class="fw-bold mb-0">${pendingRequests}</h2>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-0 bg-danger text-white p-4">
+                                    <h6 class="small text-white-50 text-uppercase">Open Support Tickets</h6>
+                                    <h2 class="fw-bold mb-0">${openTickets}</h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="card p-3 shadow-sm border border-light-subtle bg-white">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <span class="text-secondary small uppercase fw-semibold">Total Wallet Coins</span>
+                                            <h3 class="fw-bold mb-0 text-dark">₹${totalWalletCoins.toFixed(2)}</h3>
+                                        </div>
+                                        <div class="bg-primary-subtle text-primary p-2.5 rounded-3"><i class="bi bi-wallet2 fs-4"></i></div>
                                     </div>
                                 </div>
-                            </td>
-                            <td>${u.phone || 'N/A'}</td>
-                            <td class="fw-bold text-success">₹${bal.toFixed(2)}</td>
-                            <td>${u.totalKills || 0}</td>
-                            <td class="fw-bold text-primary">₹${parseFloat(u.totalWon || 0).toFixed(2)}</td>
-                        </tr>`;
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card p-3 shadow-sm border border-light-subtle bg-white">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <span class="text-secondary small uppercase fw-semibold">Total Approved Deposits</span>
+                                            <h3 class="fw-bold mb-0 text-success">₹${totalDepositedCoins.toFixed(2)}</h3>
+                                        </div>
+                                        <div class="bg-success-subtle text-success p-2.5 rounded-3"><i class="bi bi-arrow-down-left-circle fs-4"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card p-3 shadow-sm border border-light-subtle bg-white">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <span class="text-secondary small uppercase fw-semibold">Total Approved Withdrawals</span>
+                                            <h3 class="fw-bold mb-0 text-danger">₹${totalWithdrawnCoins.toFixed(2)}</h3>
+                                        </div>
+                                        <div class="bg-danger-subtle text-danger p-2.5 rounded-3"><i class="bi bi-arrow-up-right-circle fs-4"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    if (u.transactions) {
-                        Object.values(u.transactions).forEach(tx => {
-                            if(tx.status === 'pending') pendingRequests++;
-                            
-                            const txAmt = parseFloat(tx.amount) || 0;
-                            if (tx.status === 'completed' || tx.status === 'approved') {
-                                if (tx.type === 'deposit') {
-                                    totalDepositedCoins += txAmt;
-                                } else if (tx.type === 'withdrawal') {
-                                    totalWithdrawnCoins += txAmt;
-                                }
+                        <!-- FULL USERS DETAILS TABLE -->
+                        <div class="card mb-4 shadow-sm border border-light-subtle bg-white">
+                            <div class="card-header bg-light py-3 border-bottom d-flex align-items-center justify-content-between">
+                                <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-people-fill text-primary me-2"></i>Full Registered Users Details</h5>
+                                <span class="badge bg-primary">${totalUsers} Active Players</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table align-middle text-start table-hover mb-0">
+                                        <thead class="table-light text-secondary small">
+                                            <tr>
+                                                <th>Player Profile</th>
+                                                <th>Phone Number</th>
+                                                <th>Current Balance</th>
+                                                <th>Total Kills</th>
+                                                <th>Total Winnings (₹)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="font-size: 0.85rem;">
+                                            ${userRows}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                else if (paneId === 'manageStaff') {
+                    const snap = await get(ref(db, 'staff_accounts'));
+                    let rows = '';
+                    if(snap.exists()) {
+                        snap.forEach(s => {
+                            const val = s.val();
+                            const perms = [];
+                            if (val.permissions) {
+                                Object.entries(val.permissions).forEach(([k, v]) => {
+                                    if (v) perms.push(`<span class="badge bg-secondary me-1 small">${k}</span>`);
+                                });
+                            }
+                            rows += `
+                                <tr>
+                                    <td><strong>${val.username}</strong></td>
+                                    <td><code>${val.password}</code></td>
+                                    <td>${perms.join('') || '<span class="text-danger">None</span>'}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-warning me-1" onclick="editStaff('${s.key}')"><i class="bi bi-pencil-fill"></i> Edit</button>
+                                        <button class="btn btn-sm btn-outline-danger delete-btn" data-type="staff_accounts" data-id="${s.key}"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>`;
+                        });
+                    }
+                    content = `
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title" id="staffFormTitle">Create New Staff Account</h4>
+                                <form id="addStaffForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Username</label>
+                                            <input name="username" type="text" class="form-control" required placeholder="e.g. staff_aman">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Password</label>
+                                            <input name="password" type="text" class="form-control" required placeholder="Enter Secret Password">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label d-block fw-bold text-primary mb-2">Assign Permissions</label>
+                                        <div class="row">
+                                            <div class="col-md-4"><label class="form-check-label"><input type="checkbox" name="categories" class="form-check-input"> Game Categories</label></div>
+                                            <div class="col-md-4"><label class="form-check-label"><input type="checkbox" name="sliders" class="form-check-input"> Promotion Sliders</label></div>
+                                            <div class="col-md-4"><label class="form-check-label"><input type="checkbox" name="matches" class="form-check-input"> Match Management</label></div>
+                                            <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="rules" class="form-check-input"> Match Rules Editor</label></div>
+                                            <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="users" class="form-check-input"> User Management</label></div>
+                                            <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="requests" class="form-check-input"> Payment Approvals</label></div>
+                                            <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="financials" class="form-check-input"> Financial & Referrals</label></div>
+                                            <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="tickets" class="form-check-input"> Support Desk</label></div>
+                                            <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="announcements" class="form-check-input"> Announcements</label></div>
+                                            <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="themes" class="form-check-input"> Themes & Styles</label></div>
+                                            <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="settings" class="form-check-input"> App Configurations</label></div>
+                                        </div>
+                                    </div>
+                                    <button type="submit" id="staffSubmitBtn" class="btn btn-primary w-100">Save Staff Account</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">Existing Staff Credentials</h4>
+                                <div class="table-responsive">
+                                    <table class="table align-middle text-start">
+                                        <thead><tr><th>Username</th><th>Password</th><th>Assigned Permissions</th><th>Action</th></tr></thead>
+                                        <tbody>${rows}</tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+                else if (paneId === 'manageCategories') {
+                    const snap = await get(ref(db, 'games'));
+                    allGamesCache = snap.exists() ? snap.val() : {};
+                    let rows = '';
+                    if(snap.exists()) {
+                        snap.forEach(s => {
+                            const val = s.val();
+                            if (val && typeof val === 'object' && val.name && val.imageUrl) {
+                                rows += `
+                                    <tr>
+                                        <td>${val.name}</td>
+                                        <td><img src="${val.imageUrl}"></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-warning me-1" onclick="editCategory('${s.key}', '${val.name}')"><i class="bi bi-pencil-fill"></i> Edit</button>
+                                            <button class="btn btn-sm btn-outline-danger delete-btn" data-type="games" data-id="${s.key}"><i class="bi bi-trash"></i></button>
+                                        </td>
+                                    </tr>`;
+                            } else {
+                                rows += `<tr class="table-warning"><td>Corrupt Entry</td><td><small class="text-danger">No Image</small></td><td><button class="btn btn-sm btn-outline-danger delete-btn" data-type="games" data-id="${s.key}"><i class="bi bi-trash"></i> Clear</button></td></tr>`;
                             }
                         });
                     }
-                });
-
-                if (userRows === '') {
-                    userRows = `<tr><td colspan="5" class="text-center text-secondary py-3">No registered players yet.</td></tr>`;
+                    content = `
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title" id="categoryFormTitle">Add New Category</h4>
+                                <form id="addForm">
+                                    <div class="mb-2"><label class="form-label">Name</label><input name="name" type="text" class="form-control" required></div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Image</label>
+                                        <input name="image" id="categoryImageInput" type="file" class="form-control">
+                                        <div class="upload-status" id="categoryUploadStatus"></div>
+                                    </div>
+                                    <button type="submit" id="categorySubmitBtn" class="btn btn-primary">Add Category</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card"><div class="card-body"><h4 class="card-title">Existing Categories</h4><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Name</th><th>Image</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div></div></div>`;
+                } 
+                else if (paneId === 'manageSliders') {
+                    const snap = await get(ref(db, 'promotions'));
+                    let rows = '';
+                    if(snap.exists()) {
+                        snap.forEach(s => {
+                            const val = s.val();
+                            if (val && typeof val === 'object' && val.imageUrl) {
+                                rows += `<tr><td><img src="${val.imageUrl}"></td><td><button class="btn btn-sm btn-outline-danger delete-btn" data-type="promotions" data-id="${s.key}"><i class="bi bi-trash"></i></button></td></tr>`;
+                            }
+                        });
+                    }
+                    content = `
+                        <div class="card mb-4"><div class="card-body"><h4 class="card-title">Add New Slider</h4><form id="addForm"><div class="mb-2"><label>Link (Optional)</label><input name="link" type="url" class="form-control"></div><div class="mb-3"><label>Image</label><input name="image" type="file" class="form-control" required><div class="upload-status"></div></div><button type="submit" class="btn btn-primary w-100">Add Slider</button></form></div></div>
+                        <div class="card"><div class="card-body"><h4 class="card-title">Existing Sliders</h4><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Image</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div></div></div>`;
                 }
-
-                content = `
-                    <div class="row g-4 mb-4">
-                        <div class="col-md-3">
-                            <div class="card border-0 bg-primary text-white p-4">
-                                <h6 class="small text-white-50 uppercase text-uppercase">Total Players</h6>
-                                <h2 class="fw-bold mb-0">${totalUsers}</h2>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card border-0 bg-success text-white p-4">
-                                <h6 class="small text-white-50 text-uppercase">Total Matches</h6>
-                                <h2 class="fw-bold mb-0">${totalMatches}</h2>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card border-0 bg-warning text-dark p-4">
-                                <h6 class="small text-dark-50 text-uppercase">Pending Payments</h6>
-                                <h2 class="fw-bold mb-0">${pendingRequests}</h2>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card border-0 bg-danger text-white p-4">
-                                <h6 class="small text-white-50 text-uppercase">Open Support Tickets</h6>
-                                <h2 class="fw-bold mb-0">${openTickets}</h2>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <div class="card p-3 shadow-sm border border-light-subtle bg-white">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <span class="text-secondary small uppercase fw-semibold">Total Wallet Coins</span>
-                                        <h3 class="fw-bold mb-0 text-dark">₹${totalWalletCoins.toFixed(2)}</h3>
-                                    </div>
-                                    <div class="bg-primary-subtle text-primary p-2.5 rounded-3"><i class="bi bi-wallet2 fs-4"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card p-3 shadow-sm border border-light-subtle bg-white">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <span class="text-secondary small uppercase fw-semibold">Total Approved Deposits</span>
-                                        <h3 class="fw-bold mb-0 text-success">₹${totalDepositedCoins.toFixed(2)}</h3>
-                                    </div>
-                                    <div class="bg-success-subtle text-success p-2.5 rounded-3"><i class="bi bi-arrow-down-left-circle fs-4"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card p-3 shadow-sm border border-light-subtle bg-white">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <span class="text-secondary small uppercase fw-semibold">Total Approved Withdrawals</span>
-                                        <h3 class="fw-bold mb-0 text-danger">₹${totalWithdrawnCoins.toFixed(2)}</h3>
-                                    </div>
-                                    <div class="bg-danger-subtle text-danger p-2.5 rounded-3"><i class="bi bi-arrow-up-right-circle fs-4"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- FULL USERS DETAILS TABLE -->
-                    <div class="card mb-4 shadow-sm border border-light-subtle bg-white">
-                        <div class="card-header bg-light py-3 border-bottom d-flex align-items-center justify-content-between">
-                            <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-people-fill text-primary me-2"></i>Full Registered Users Details</h5>
-                            <span class="badge bg-primary">${totalUsers} Active Players</span>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table align-middle text-start table-hover mb-0">
-                                    <thead class="table-light text-secondary small">
-                                        <tr>
-                                            <th>Player Profile</th>
-                                            <th>Phone Number</th>
-                                            <th>Current Balance</th>
-                                            <th>Total Kills</th>
-                                            <th>Total Winnings (₹)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody style="font-size: 0.85rem;">
-                                        ${userRows}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-            else if (paneId === 'manageStaff') {
-                const snap = await get(ref(db, 'staff_accounts'));
-                let rows = '';
-                if(snap.exists()) {
-                    snap.forEach(s => {
-                        const val = s.val();
-                        const perms = [];
-                        if (val.permissions) {
-                            Object.entries(val.permissions).forEach(([k, v]) => {
-                                if (v) perms.push(`<span class="badge bg-secondary me-1 small">${k}</span>`);
-                            });
-                        }
-                        rows += `
-                            <tr>
-                                <td><strong>${val.username}</strong></td>
-                                <td><code>${val.password}</code></td>
-                                <td>${perms.join('') || '<span class="text-danger">None</span>'}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="editStaff('${s.key}')"><i class="bi bi-pencil-fill"></i> Edit</button>
-                                    <button class="btn btn-sm btn-outline-danger delete-btn" data-type="staff_accounts" data-id="${s.key}"><i class="bi bi-trash"></i></button>
-                                </td>
-                            </tr>`;
-                    });
-                }
-                content = `
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h4 class="card-title" id="staffFormTitle">Create New Staff Account</h4>
-                            <form id="addStaffForm">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Username</label>
-                                        <input name="username" type="text" class="form-control" required placeholder="e.g. staff_aman">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Password</label>
-                                        <input name="password" type="text" class="form-control" required placeholder="Enter Secret Password">
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label d-block fw-bold text-primary mb-2">Assign Permissions</label>
-                                    <div class="row">
-                                        <div class="col-md-4"><label class="form-check-label"><input type="checkbox" name="categories" class="form-check-input"> Game Categories</label></div>
-                                        <div class="col-md-4"><label class="form-check-label"><input type="checkbox" name="sliders" class="form-check-input"> Promotion Sliders</label></div>
-                                        <div class="col-md-4"><label class="form-check-label"><input type="checkbox" name="matches" class="form-check-input"> Match Management</label></div>
-                                        <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="rules" class="form-check-input"> Match Rules Editor</label></div>
-                                        <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="users" class="form-check-input"> User Management</label></div>
-                                        <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="requests" class="form-check-input"> Payment Approvals</label></div>
-                                        <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="financials" class="form-check-input"> Financial & Referrals</label></div>
-                                        <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="tickets" class="form-check-input"> Support Desk</label></div>
-                                        <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="announcements" class="form-check-input"> Announcements</label></div>
-                                        <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="themes" class="form-check-input"> Themes & Styles</label></div>
-                                        <div class="col-md-4 mt-2"><label class="form-check-label"><input type="checkbox" name="settings" class="form-check-input"> App Configurations</label></div>
-                                    </div>
-                                </div>
-                                <button type="submit" id="staffSubmitBtn" class="btn btn-primary w-100">Save Staff Account</button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title">Existing Staff Credentials</h4>
-                            <div class="table-responsive">
-                                <table class="table align-middle text-start">
-                                    <thead><tr><th>Username</th><th>Password</th><th>Assigned Permissions</th><th>Action</th></tr></thead>
-                                    <tbody>${rows}</tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>`;
-            }
-            else if (paneId === 'manageCategories') {
-                const snap = await get(ref(db, 'games'));
-                allGamesCache = snap.exists() ? snap.val() : {};
-                let rows = '';
-                if(snap.exists()) {
-                    snap.forEach(s => {
-                        const val = s.val();
-                        if (val && typeof val === 'object' && val.name && val.imageUrl) {
+                else if (paneId === 'manageMatches') {
+                    const [gamesSnap, matchesSnap] = await Promise.all([get(ref(db, 'games')), get(ref(db, 'tournaments'))]);
+                    let categoryOptions = '';
+                    const categoriesCache = {};
+                    if(gamesSnap.exists()) {
+                        gamesSnap.forEach(s => {
+                            const val = s.val();
+                            if (val && typeof val === 'object' && val.name) {
+                                categoriesCache[s.key] = val.name;
+                                categoryOptions += `<option value="${s.key}">${val.name}</option>`;
+                            }
+                        });
+                    }
+                    let rows = '';
+                    if(matchesSnap.exists()) {
+                        allTournamentsCache = matchesSnap.val(); 
+                        matchesSnap.forEach(s => {
+                            const data = s.val();
                             rows += `
                                 <tr>
-                                    <td>${val.name}</td>
-                                    <td><img src="${val.imageUrl}"></td>
+                                    <td>${data.name}</td>
+                                    <td>₹${data.entryFee}</td>
+                                    <td>₹${data.prizePool}</td>
+                                    <td>${categoriesCache[data.gameId] || 'N/A'}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-warning me-1" onclick="editCategory('${s.key}', '${val.name}')"><i class="bi bi-pencil-fill"></i> Edit</button>
-                                        <button class="btn btn-sm btn-outline-danger delete-btn" data-type="games" data-id="${s.key}"><i class="bi bi-trash"></i></button>
+                                        <select class="form-select form-select-sm status-select" data-id="${s.key}">
+                                            <option value="upcoming" ${data.status === 'upcoming' ? 'selected' : ''}>Upcoming</option>
+                                            <option value="ongoing" ${data.status === 'ongoing' ? 'selected' : ''}>Ongoing</option>
+                                            <option value="completed" ${data.status === 'completed' ? 'selected' : ''}>Completed</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-warning mb-1" onclick="editMatch('${s.key}')"><i class="bi bi-pencil-fill"></i> Edit</button>
+                                        <button class="btn btn-sm btn-outline-success mb-1" onclick="duplicateMatch('${s.key}')"><i class="bi bi-files"></i> Duplicate</button>
+                                        <button class="btn btn-sm btn-outline-primary mb-1" onclick="setRoomCredentials('${s.key}', '${data.roomId || ''}', '${data.roomPassword || ''}')"><i class="bi bi-key-fill"></i> Room</button>
+                                        <button class="btn btn-sm btn-outline-info mb-1" onclick="viewMatchRoster('${s.key}', '${data.name}')"><i class="bi bi-people-fill"></i> Roster</button>
+                                        <button class="btn btn-sm btn-outline-danger delete-btn mb-1" data-type="tournaments" data-id="${s.key}"><i class="bi bi-trash"></i></button>
                                     </td>
                                 </tr>`;
-                        } else {
-                            rows += `<tr class="table-warning"><td>Corrupt Entry</td><td><small class="text-danger">No Image</small></td><td><button class="btn btn-sm btn-outline-danger delete-btn" data-type="games" data-id="${s.key}"><i class="bi bi-trash"></i> Clear</button></td></tr>`;
-                        }
-                    });
-                }
-                content = `
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h4 class="card-title" id="categoryFormTitle">Add New Category</h4>
-                            <form id="addForm">
-                                <div class="mb-2"><label class="form-label">Name</label><input name="name" type="text" class="form-control" required></div>
-                                <div class="mb-3">
-                                    <label class="form-label">Image</label>
-                                    <input name="image" id="categoryImageInput" type="file" class="form-control">
-                                    <div class="upload-status" id="categoryUploadStatus"></div>
-                                </div>
-                                <button type="submit" id="categorySubmitBtn" class="btn btn-primary">Add Category</button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="card"><div class="card-body"><h4 class="card-title">Existing Categories</h4><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Name</th><th>Image</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div></div></div>`;
-            } 
-            else if (paneId === 'manageSliders') {
-                const snap = await get(ref(db, 'promotions'));
-                let rows = '';
-                if(snap.exists()) {
-                    snap.forEach(s => {
-                        const val = s.val();
-                        if (val && typeof val === 'object' && val.imageUrl) {
-                            rows += `<tr><td><img src="${val.imageUrl}"></td><td><button class="btn btn-sm btn-outline-danger delete-btn" data-type="promotions" data-id="${s.key}"><i class="bi bi-trash"></i></button></td></tr>`;
-                        }
-                    });
-                }
-                content = `
-                    <div class="card mb-4"><div class="card-body"><h4 class="card-title">Add New Slider</h4><form id="addForm"><div class="mb-2"><label>Link (Optional)</label><input name="link" type="url" class="form-control"></div><div class="mb-3"><label>Image</label><input name="image" type="file" class="form-control" required><div class="upload-status"></div></div><button type="submit" class="btn btn-primary w-100">Add Slider</button></form></div></div>
-                    <div class="card"><div class="card-body"><h4 class="card-title">Existing Sliders</h4><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Image</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div></div></div>`;
-            }
-            else if (paneId === 'manageMatches') {
-                const [gamesSnap, matchesSnap] = await Promise.all([get(ref(db, 'games')), get(ref(db, 'tournaments'))]);
-                let categoryOptions = '';
-                const categoriesCache = {};
-                if(gamesSnap.exists()) {
-                    gamesSnap.forEach(s => {
-                        const val = s.val();
-                        if (val && typeof val === 'object' && val.name) {
-                            categoriesCache[s.key] = val.name;
-                            categoryOptions += `<option value="${s.key}">${val.name}</option>`;
-                        }
-                    });
-                }
-                let rows = '';
-                if(matchesSnap.exists()) {
-                    allTournamentsCache = matchesSnap.val(); 
-                    matchesSnap.forEach(s => {
-                        const data = s.val();
-                        rows += `
-                            <tr>
-                                <td>${data.name}</td>
-                                <td>₹${data.entryFee}</td>
-                                <td>₹${data.prizePool}</td>
-                                <td>${categoriesCache[data.gameId] || 'N/A'}</td>
-                                <td>
-                                    <select class="form-select form-select-sm status-select" data-id="${s.key}">
-                                        <option value="upcoming" ${data.status === 'upcoming' ? 'selected' : ''}>Upcoming</option>
-                                        <option value="ongoing" ${data.status === 'ongoing' ? 'selected' : ''}>Ongoing</option>
-                                        <option value="completed" ${data.status === 'completed' ? 'selected' : ''}>Completed</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-warning mb-1" onclick="editMatch('${s.key}')"><i class="bi bi-pencil-fill"></i> Edit</button>
-                                    <button class="btn btn-sm btn-outline-success mb-1" onclick="duplicateMatch('${s.key}')"><i class="bi bi-files"></i> Duplicate</button>
-                                    <button class="btn btn-sm btn-outline-primary mb-1" onclick="setRoomCredentials('${s.key}', '${data.roomId || ''}', '${data.roomPassword || ''}')"><i class="bi bi-key-fill"></i> Room</button>
-                                    <button class="btn btn-sm btn-outline-info mb-1" onclick="viewMatchRoster('${s.key}', '${data.name}')"><i class="bi bi-people-fill"></i> Roster</button>
-                                    <button class="btn btn-sm btn-outline-danger delete-btn mb-1" data-type="tournaments" data-id="${s.key}"><i class="bi bi-trash"></i></button>
-                                </td>
-                            </tr>`;
-                    });
-                }
-                content = `
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h4 class="card-title" id="matchFormTitle">Add New Match</h4>
-                            <form id="addForm">
-                                <div class="mb-2">
-                                    <label>Category</label>
-                                    <select name="gameId" class="form-select" required>${categoryOptions}</select>
-                                </div>
-                                <div class="mb-2">
-                                    <label>Name</label>
-                                    <input name="name" type="text" class="form-control" required>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-4"><label>Entry Fee (₹)</label><input name="entryFee" type="number" class="form-control" value="0" required></div>
-                                    <div class="col-4"><label>Prize Pool (₹)</label><input name="prizePool" type="number" class="form-control" value="0" required></div>
-                                    <div class="col-4"><label>Per Kill Reward (₹)</label><input name="perKill" type="number" class="form-control" value="0" required></div>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-4">
-                                        <label>Map Name</label>
-                                        <select name="map" class="form-select">
-                                            <option value="Bermuda">Bermuda</option>
-                                            <option value="Purgatory">Purgatory</option>
-                                            <option value="Kalahari">Kalahari</option>
-                                            <option value="Alpine">Alpine</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-4">
-                                        <label>Team Size</label>
-                                        <select name="matchType" class="form-select">
-                                            <option value="Solo">Solo</option>
-                                            <option value="Duo">Duo</option>
-                                            <option value="Squad">Squad</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-4"><label>Total Spots</label><input name="totalSpots" type="number" class="form-control" value="48" required></div>
-                                </div>
-                                <div class="mb-3">
-                                    <label>Match Schedule (Date & Time)</label>
-                                    <input name="dateTime" id="matchDateTimeInput" type="datetime-local" class="form-control" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label>Custom Match Banner Image (Optional)</label>
-                                    <input name="bannerFile" type="file" class="form-control">
-                                    <div class="upload-status" id="bannerUploadStatus"></div>
-                                </div>
-                                <button type="submit" id="addMatchSubmitBtn" class="btn btn-primary w-100">Publish Match</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- AUTO MATCH GENERATOR -->
-                    <div class="card mb-4" style="border-color: var(--accent-secondary); box-shadow: 0 4px 15px rgba(16,185,129,0.1);">
-                        <div class="card-body">
-                            <h4 class="card-title text-success"><i class="bi bi-clock-history"></i> Auto-Generate Daily Schedule</h4>
-                            <form id="autoScheduleForm">
-                                <div class="row">
-                                    <div class="col-md-6 mb-2"><label class="form-label fw-bold">Select Date</label><input type="date" id="autoScheduleDate" class="form-control" required></div>
-                                    <div class="col-md-6 mb-2"><label class="form-label fw-bold">Select Game Category</label><select id="autoScheduleGameId" class="form-select" required>${categoryOptions}</select></div>
-                                </div>
-                                <div class="row mt-2">
-                                    <div class="col-md-4 mb-2"><label class="form-label fw-bold">Start Time</label><input type="time" id="autoScheduleStartTime" class="form-control" value="10:00" required></div>
-                                    <div class="col-md-4 mb-2"><label class="form-label fw-bold">End Time</label><input type="time" id="autoScheduleEndTime" class="form-control" value="22:00" required></div>
-                                    <div class="col-md-4 mb-2"><label class="form-label fw-bold">Interval (Minutes)</label><input type="number" id="autoScheduleInterval" class="form-control" value="60" min="5" required></div>
-                                </div>
-                                <div class="row mt-2">
-                                    <div class="col-md-6 mb-2"><label class="form-label fw-bold">Total Spots</label><input type="number" id="autoScheduleSpots" class="form-control" value="2" required></div>
-                                    <div class="col-md-6 mb-2"><label class="form-label fw-bold">Team Size</label><select id="autoScheduleType" class="form-select" required><option value="Solo">Solo (1v1)</option><option value="Duo">Duo (2v2)</option><option value="Squad">Squad (4v4)</option></select></div>
-                                </div>
-                                <div class="row mt-2">
-                                    <div class="col-md-6 mb-3"><label class="form-label fw-bold">Base Entry Fee (₹)</label><input type="number" id="autoScheduleFee" class="form-control" value="5" required></div>
-                                    <div class="col-md-6 mb-3"><label class="form-label fw-bold">Base Prize Pool (₹)</label><input type="number" id="autoSchedulePrize" class="form-control" value="10" required></div>
-                                </div>
-                                <button type="submit" class="btn btn-success w-100 fw-bold">GENERATE MATCHES</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="mb-3 text-primary fw-bold">Existing Matches</h5>
-                            <div class="table-responsive">
-                                <table class="table align-middle">
-                                    <thead><tr><th>Name</th><th>Fee</th><th>Prize</th><th>Category</th><th>Status</th><th>Action</th></tr></thead>
-                                    <tbody>${rows}</tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="matchRosterViewer"></div>`;
-            }
-            else if (paneId === 'manageRules') {
-                const settingsSnap = await get(ref(db, 'settings'));
-                const globalRules = settingsSnap.exists() ? (settingsSnap.val().rules || '') : '';
-                content = `
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h4 class="card-title">Global Match Rules</h4>
-                            <form id="globalRulesForm">
-                                <div class="mb-3">
-                                    <textarea name="globalRulesText" id="globalRulesText" class="form-control" rows="6" placeholder="Enter rules...">${globalRules}</textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Save Global Rules</button>
-                            </form>
-                        </div>
-                    </div>`;
-            }
-            else if (paneId === 'manageUsers') {
-                const snap = await get(ref(db, 'users'));
-                let rows = '';
-                if(snap.exists()) snap.forEach(s => {
-                    const u = s.val();
-                    const avatarUrl = u.profilePicUrl || 'https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(u.displayName || 'Gamer');
-                    rows += `
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <img src="${avatarUrl}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 50%; border: 1px solid var(--border-color);">
-                                    <div>
-                                        <strong>${u.displayName || 'No Name'}</strong><br>
-                                        <small class="text-secondary">${u.email}</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>${u.phone || 'N/A'}</td>
-                            <td>₹${parseFloat(u.balance || 0).toFixed(2)}</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary me-1" onclick="editUserBalance('${s.key}', ${parseFloat(u.balance || 0)}, '${u.displayName || 'User'}')"><i class="bi bi-pencil-fill"></i> Balance</button>
-                                <button class="btn btn-sm btn-warning me-1" onclick="editUserStats('${s.key}', ${u.totalKills || 0}, ${u.totalWon || 0}, '${u.displayName || 'User'}')"><i class="bi bi-trophy-fill"></i> Stats</button>
-                                <button class="btn btn-sm btn-info text-white" onclick="viewUserTransactions('${s.key}', '${u.displayName || 'User'}')"><i class="bi bi-eye"></i> Tx Logs</button>
-                            </td>
-                        </tr>`;
-                });
-                content = `
-                    <div class="card"><div class="card-body"><h4 class="card-title">All Users</h4><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Player Info</th><th>Phone</th><th>Balance</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div></div></div>
-                    <div id="userTransactionsViewer"></div>`;
-            }
-            else if (paneId === 'manageRequests') {
-                const usersSnap = await get(ref(db, 'users'));
-                let rows = '';
-                if (usersSnap.exists()) {
-                    usersSnap.forEach(userSnap => {
-                        const uid = userSnap.key;
-                        const u = userSnap.val();
-                        if (u.transactions) {
-                            Object.entries(u.transactions).forEach(([txId, tx]) => {
-                                if (tx.status === 'pending') {
-                                    const date = tx.timestamp ? new Date(tx.timestamp).toLocaleString() : 'N/A';
-                                    let details = tx.type === 'deposit' ? `UTR: ${tx.utr || 'N/A'}` : `UPI: ${tx.upiId || 'N/A'}`;
-                                    
-                                    if (tx.screenshotUrl) {
-                                        details += `<br><a href="${tx.screenshotUrl}" target="_blank" class="btn btn-sm btn-outline-info py-0 px-2 mt-1 d-inline-flex align-items-center gap-1" style="font-size:0.75rem;"><i class="bi bi-image"></i> View Screenshot</a>`;
-                                    }
-                                    
-                                    rows += `
-                                        <tr>
-                                            <td><strong>${u.displayName || 'Gamer'}</strong><br><small class="text-secondary">${u.email}</small></td>
-                                            <td><span class="badge ${tx.type === 'deposit' ? 'bg-success' : 'bg-danger'}">${tx.type.toUpperCase()}</span></td>
-                                            <td class="fw-bold">₹${tx.amount}</td>
-                                            <td><small class="text-secondary">${details}</small></td>
-                                            <td><small class="text-secondary">${date}</small></td>
-                                            <td>
-                                                <select class="form-select form-select-sm request-status-select" 
-                                                        data-uid="${uid}" 
-                                                        data-txid="${txid}" 
-                                                        data-amount="${tx.amount}" 
-                                                        data-type="${tx.type}"
-                                                        data-current-status="pending">
-                                                    <option value="pending" selected>Pending</option>
-                                                    <option value="completed">Completed (Approve)</option>
-                                                    <option value="failed">Failed (Reject)</option>
-                                                </select>
-                                            </td>
-                                        </tr>`;
-                                }
-                            });
-                        }
-                    });
-                }
-                if (!rows) {
-                    rows = `<tr><td colspan="6" class="text-center text-secondary py-4">No pending payment requests found!</td></tr>`;
-                }
-                content = `
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title">Pending Payment Requests</h4>
-                            <div class="table-responsive">
-                                <table class="table align-middle text-start">
-                                    <thead><tr><th>User</th><th>Type</th><th>Amount</th><th>Details</th><th>Date</th><th>Action</th></tr></thead>
-                                    <tbody>${rows}</tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>`;
-            }
-            else if (paneId === 'manageFinancials') {
-                const settingsSnap = await get(ref(db, 'settings'));
-                const config = settingsSnap.exists() ? settingsSnap.val() : {};
-                
-                content = `
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h4 class="card-title"><i class="bi bi-cash-coin me-2"></i>Financial Limits & Referral Settings</h4>
-                            <form id="financialsForm">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3"><label class="form-label fw-bold">Minimum Deposit Amount (Coins)</label><input name="minDeposit" type="number" class="form-control" value="${config.minDeposit || 10}" min="1" required></div>
-                                    <div class="col-md-6 mb-3"><label class="form-label fw-bold">Minimum Withdrawal Amount (Coins)</label><input name="minWithdrawal" type="number" class="form-control" value="${config.minWithdrawal || 50}" min="1" required></div>
-                                    <div class="col-md-6 mb-3"><label class="form-label fw-bold">Referral Bonus (Coins)</label><input name="referralReward" type="number" class="form-control" value="${config.referralReward || 10}" min="0" required></div>
-                                    <div class="col-md-6 mb-3"><label class="form-label fw-bold">Official Deposit UPI ID</label><input name="depositUpiId" type="text" class="form-control" value="${config.depositUpiId || ''}" placeholder="e.g. pay@upi" required></div>
-                                </div>
-                                <button type="submit" class="btn btn-primary w-100 py-2 mt-3">Save Financial Settings</button>
-                            </form>
-                        </div>
-                    </div>`;
-            }
-            else if (paneId === 'manageTickets') {
-                const snap = await get(ref(db, 'support_tickets'));
-                let rows = '';
-                if (snap.exists()) {
-                    snap.forEach(s => {
-                        const t = s.val();
-                        const date = t.timestamp ? new Date(t.timestamp).toLocaleString() : 'N/A';
-                        rows += `
-                            <tr>
-                                <td>${t.displayName || 'Gamer'} (${t.email || 'N/A'})</td>
-                                <td><span class="badge bg-secondary">${t.category}</span></td>
-                                <td>${t.message}</td>
-                                <td>${date}</td>
-                                <td>
-                                    <select class="form-select form-select-sm ticket-status-select" data-id="${s.key}">
-                                        <option value="open" ${t.status === 'open' ? 'selected' : ''}>Open</option>
-                                        <option value="closed" ${t.status === 'closed' ? 'selected' : ''}>Closed</option>
-                                    </select>
-                                </td>
-                                <td><button class="btn btn-sm btn-outline-danger delete-btn" data-type="support_tickets" data-id="${s.key}"><i class="bi bi-trash"></i></button></td>
-                            </tr>`;
-                    });
-                } else {
-                    rows = `<tr><td colspan="6" class="text-center text-secondary py-3">No active tickets found.</td></tr>`;
-                }
-                content = `
-                    <div class="card"><div class="card-body"><h4 class="card-title">Support Tickets Help desk</h4><div class="table-responsive"><table class="table align-middle"><thead><tr><th>User</th><th>Category</th><th>Message</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div></div></div>`;
-            }
-            else if (paneId === 'manageAnnouncements') {
-                const snap = await get(ref(db, 'announcements'));
-                let rows = '';
-                if(snap.exists()) snap.forEach(s => {
-                    rows += `<tr><td>${s.val().title}</td><td>${s.val().message}</td><td>${s.val().date || ''}</td><td><button class="btn btn-sm btn-outline-danger delete-btn" data-type="announcements" data-id="${s.key}"><i class="bi bi-trash"></i></button></td></tr>`;
-                });
-                content = `
-                    <div class="card mb-4"><div class="card-body"><h4 class="card-title">Add Announcement</h4><form id="addForm"><div class="mb-2"><label>Title</label><input name="title" type="text" class="form-control" required></div><div class="mb-3"><label>Message</label><textarea name="message" class="form-control" rows="3" required></textarea></div><button type="submit" class="btn btn-primary">Publish Announcement</button></form></div></div>
-                    <div class="card"><div class="card-body"><h4 class="card-title">Active Announcements</h4><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Title</th><th>Message</th><th>Date</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div></div></div>`;
-            }
-            else if (paneId === 'manageAppThemes') {
-                const snap = await get(ref(db, 'settings'));
-                const themeConfig = snap.exists() ? snap.val() : {};
-                const selectedTheme = themeConfig.appTheme || 'cyberpunk';
-                
-                content = `
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h4 class="card-title">User Mobile App Theme Settings</h4>
-                            <form id="addForm">
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Active Player App Theme</label>
-                                    <select name="selectedTheme" id="selectedThemeSelect" class="form-select" required>
-                                        <option value="cyberpunk" ${selectedTheme === 'cyberpunk' ? 'selected' : ''}>Standard Dark Violet (Pink & Cyan Buttons)</option>
-                                        <option value="light" ${selectedTheme === 'light' ? 'selected' : ''}>Standard Light Theme</option>
-                                        <option value="dark" ${selectedTheme === 'dark' ? 'selected' : ''}>Standard Dark slate Theme</option>
-                                        <option value="toxic" ${selectedTheme === 'toxic' ? 'selected' : ''}>Toxic Green Theme</option>
-                                        <option value="custom" ${selectedTheme === 'custom' ? 'selected' : ''}>Custom Hex Colors</option>
-                                    </select>
-                                </div>
-
-                                <div id="customColorsSection" style="${selectedTheme === 'custom' ? 'display: block;' : 'display: none;'}">
-                                    <hr class="my-4">
-                                    <h5 class="mb-3 text-primary">Custom App Palette</h5>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3"><label class="form-label">Primary Brand Color</label><div class="d-flex gap-2"><input type="color" name="primaryColor" class="form-control form-control-color" value="${themeConfig.primaryColor || '#FF007F'}"><input type="text" class="form-control hex-text" value="${themeConfig.primaryColor || '#FF007F'}" placeholder="#FF007F" maxlength="7"></div></div>
-                                        <div class="col-md-6 mb-3"><label class="form-label">Accent Color</label><div class="d-flex gap-2"><input type="color" name="secondaryColor" class="form-control form-control-color" value="${themeConfig.secondaryColor || '#00F0FF'}"><input type="text" class="form-control hex-text" value="${themeConfig.secondaryColor || '#00F0FF'}" placeholder="#00F0FF" maxlength="7"></div></div>
-                                        <div class="col-md-6 mb-3"><label class="form-label">Player App Background Color</label><div class="d-flex gap-2"><input type="color" name="backgroundColor" class="form-control form-control-color" value="${themeConfig.backgroundColor || '#0F0C20'}"><input type="text" class="form-control hex-text" value="${themeConfig.backgroundColor || '#0F0C20'}" placeholder="#0F0C20" maxlength="7"></div></div>
-                                        <div class="col-md-6 mb-3"><label class="form-label">Primary Font/Text Color</label><div class="d-flex gap-2"><input type="color" name="textColor" class="form-control form-control-color" value="${themeConfig.textColor || '#FFFFFF'}"><input type="text" class="form-control hex-text" value="${themeConfig.textColor || '#FFFFFF'}" placeholder="#FFFFFF" maxlength="7"></div></div>
-                                    </div>
-                                </div>
-
-                                <button type="submit" class="btn btn-primary w-100 py-2 mt-3">Publish Themes Update to App</button>
-                            </form>
-                        </div>
-                    </div>`;
-            }
-            else if (paneId === 'manageSettings') {
-                const snap = await get(ref(db, 'settings'));
-                const config = snap.exists() ? snap.val() : {};
-                
-                content = `
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h4 class="card-title">User App Logo & Support Settings</h4>
-                            <form id="addForm">
-                                <div class="mb-3"><label class="form-label">User App Logo URL</label><input name="userAppLogoUrl" type="url" class="form-control" value="${config.userAppLogoUrl || ''}"></div>
-                                <div class="mb-3"><label class="form-label">Telegram / WhatsApp Support URL</label><input name="customerSupportUrl" type="url" class="form-control" value="${config.customerSupportUrl || ''}"></div>
-
-                                <div class="mb-3"><label class="form-label">Player App Start Splash Welcome Image URL (ReadOnly)</label><input name="splashImageUrl" id="splashImageUrlInput" type="url" class="form-control" value="${config.splashImageUrl || ''}" readonly></div>
-                                <div class="mb-3"><label class="form-label">Upload New Start Splash Welcome Image</label><input name="splashFile" id="splashFile" type="file" class="form-control"><div class="upload-status" id="splashUploadStatus"></div></div>
-
-                                <hr class="my-4 border-secondary">
-                                <h4 class="text-primary mb-3">Deposit UPI & QR Settings</h4>
-                                
-                                <div class="mb-3"><label class="form-label">Deposit UPI ID</label><input name="depositUpiId" type="text" class="form-control" value="${config.depositUpiId || ''}"></div>
-                                <div class="mb-3"><label class="form-label">Deposit QR Code URL (ReadOnly)</label><input name="depositQrCodeUrl" id="depositQrCodeUrlInput" type="url" class="form-control" value="${config.depositQrCodeUrl || ''}" readonly></div>
-                                <div class="mb-3"><label class="form-label">Upload New Deposit QR Image Code</label><input name="depositQrFile" id="depositQrFile" type="file" class="form-control"><div class="upload-status" id="qrUploadStatus"></div></div>
-
-                                <button type="submit" class="btn btn-primary w-100 py-2">Save All Settings</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- AUTHORIZED ADMIN EMAIL CONFIG -->
-                    <div class="card mb-4" style="border-color: var(--danger-color);">
-                        <div class="card-body">
-                            <h4 class="card-title text-danger"><i class="bi bi-shield-lock-fill"></i> Authorized Admin Email Settings</h4>
-                            <p class="text-secondary small">You can update the authorized admin email address below. Ensure the email is registered in Firebase Auth first.</p>
-                            <form id="changeAdminCredsForm">
-                                <div class="mb-3">
-                                    <label class="form-label">Authorized Admin Email</label>
-                                    <input type="email" id="newAdminEmail" class="form-control" required placeholder="e.g. admin@kkesports.com">
-                                </div>
-                                <button type="submit" class="btn btn-danger w-100 py-2">Update Authorized Admin Email</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- CHANGE ADMIN PASSWORD SECTION -->
-                    <div class="card mb-4" style="border-color: var(--danger-color);">
-                        <div class="card-body">
-                            <h4 class="card-title text-danger"><i class="bi bi-key-fill"></i> Change Admin Password</h4>
-                            <p class="text-secondary small">Update your master admin account password securely. You must be signed in recently to perform this action.</p>
-                            <form id="changeAdminPasswordForm">
-                                <div class="mb-3">
-                                    <label class="form-label">New Password</label>
-                                    <input type="text" id="newAdminPasswordInput" class="form-control" required minlength="6" placeholder="Minimum 6 characters">
-                                </div>
-                                <button type="submit" class="btn btn-danger w-100 py-2">Update Admin Password</button>
-                            </form>
-                        </div>
-                    </div>`;
-            }
-
-            paneContainer.innerHTML = content;
-
-            // CHANGE ADMIN EMAIL SUBMIT HANDLER
-            if (paneId === 'manageSettings') {
-                const credsForm = getElement('changeAdminCredsForm');
-                if (credsForm) {
-                    const adminSnap = await get(ref(db, 'admin'));
-                    if (adminSnap.exists()) {
-                        getElement('newAdminEmail').value = adminSnap.val().email || '';
+                        });
                     }
+                    content = `
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title" id="matchFormTitle">Add New Match</h4>
+                                <form id="addForm">
+                                    <div class="mb-2">
+                                        <label>Category</label>
+                                        <select name="gameId" class="form-select" required>${categoryOptions}</select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label>Name</label>
+                                        <input name="name" type="text" class="form-control" required>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><label>Entry Fee (₹)</label><input name="entryFee" type="number" class="form-control" value="0" required></div>
+                                        <div class="col-4"><label>Prize Pool (₹)</label><input name="prizePool" type="number" class="form-control" value="0" required></div>
+                                        <div class="col-4"><label>Per Kill Reward (₹)</label><input name="perKill" type="number" class="form-control" value="0" required></div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-4">
+                                            <label>Map Name</label>
+                                            <select name="map" class="form-select">
+                                                <option value="Bermuda">Bermuda</option>
+                                                <option value="Purgatory">Purgatory</option>
+                                                <option value="Kalahari">Kalahari</option>
+                                                <option value="Alpine">Alpine</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-4">
+                                            <label>Team Size</label>
+                                            <select name="matchType" class="form-select">
+                                                <option value="Solo">Solo</option>
+                                                <option value="Duo">Duo</option>
+                                                <option value="Squad">Squad</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-4"><label>Total Spots</label><input name="totalSpots" type="number" class="form-control" value="48" required></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Match Schedule (Date & Time)</label>
+                                        <input name="dateTime" id="matchDateTimeInput" type="datetime-local" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Custom Match Banner Image (Optional)</label>
+                                        <input name="bannerFile" type="file" class="form-control">
+                                        <div class="upload-status" id="bannerUploadStatus"></div>
+                                    </div>
+                                    <button type="submit" id="addMatchSubmitBtn" class="btn btn-primary w-100">Publish Match</button>
+                                </form>
+                            </div>
+                        </div>
 
-                    credsForm.addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        showLoader(true);
-                        const newEmail = getElement('newAdminEmail').value.trim();
-                        try {
-                            const freshSnap = await get(ref(db, 'admin'));
-                            const currentPassword = freshSnap.exists() ? (freshSnap.val().password || 'admin123') : 'admin123';
-                            
-                            // Secure sync update of Authentication identity with Realtime Database
-                            const user = auth.currentUser;
-                            if (user) {
-                                await updateEmail(user, newEmail);
-                            }
+                        <!-- AUTO MATCH GENERATOR -->
+                        <div class="card mb-4" style="border-color: var(--accent-secondary); box-shadow: 0 4px 15px rgba(16,185,129,0.1);">
+                            <div class="card-body">
+                                <h4 class="card-title text-success"><i class="bi bi-clock-history"></i> Auto-Generate Daily Schedule</h4>
+                                <form id="autoScheduleForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2"><label class="form-label fw-bold">Select Date</label><input type="date" id="autoScheduleDate" class="form-control" required></div>
+                                        <div class="col-md-6 mb-2"><label class="form-label fw-bold">Select Game Category</label><select id="autoScheduleGameId" class="form-select" required>${categoryOptions}</select></div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-4 mb-2"><label class="form-label fw-bold">Start Time</label><input type="time" id="autoScheduleStartTime" class="form-control" value="10:00" required></div>
+                                        <div class="col-md-4 mb-2"><label class="form-label fw-bold">End Time</label><input type="time" id="autoScheduleEndTime" class="form-control" value="22:00" required></div>
+                                        <div class="col-md-4 mb-2"><label class="form-label fw-bold">Interval (Minutes)</label><input type="number" id="autoScheduleInterval" class="form-control" value="60" min="5" required></div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-6 mb-2"><label class="form-label fw-bold">Total Spots</label><input type="number" id="autoScheduleSpots" class="form-control" value="2" required></div>
+                                        <div class="col-md-6 mb-2"><label class="form-label fw-bold">Team Size</label><select id="autoScheduleType" class="form-select" required><option value="Solo">Solo (1v1)</option><option value="Duo">Duo (2v2)</option><option value="Squad">Squad (4v4)</option></select></div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-6 mb-3"><label class="form-label fw-bold">Base Entry Fee (₹)</label><input type="number" id="autoScheduleFee" class="form-control" value="5" required></div>
+                                        <div class="col-md-6 mb-3"><label class="form-label fw-bold">Base Prize Pool (₹)</label><input type="number" id="autoSchedulePrize" class="form-control" value="10" required></div>
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100 fw-bold">GENERATE MATCHES</button>
+                                </form>
+                            </div>
+                        </div>
 
-                            await set(ref(db, 'admin'), {
-                                username: newEmail.split('@')[0],
-                                password: currentPassword,
-                                email: newEmail,
-                                uid: auth.currentUser.uid
-                            });
-                            showStatus('Authorized Admin Email updated successfully! Logging out in 2 seconds...', 'success');
-                            setTimeout(() => { performLogout(); }, 2000);
-                        } catch(err) {
-                            if (err.code === 'auth/requires-recent-login') {
-                                showStatus('For security, please log out and log back in before updating email.', 'danger');
-                            } else {
-                                showStatus('Failed to update email: ' + err.message, 'danger');
-                            }
-                        } finally {
-                            showLoader(false);
-                        }
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="mb-3 text-primary fw-bold">Existing Matches</h5>
+                                <div class="table-responsive">
+                                    <table class="table align-middle">
+                                        <thead><tr><th>Name</th><th>Fee</th><th>Prize</th><th>Category</th><th>Status</th><th>Action</th></tr></thead>
+                                        <tbody>${rows}</tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="matchRosterViewer"></div>`;
+                }
+                else if (paneId === 'manageRules') {
+                    const settingsSnap = await get(ref(db, 'settings'));
+                    const globalRules = settingsSnap.exists() ? (settingsSnap.val().rules || '') : '';
+                    content = `
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title">Global Match Rules</h4>
+                                <form id="globalRulesForm">
+                                    <div class="mb-3">
+                                        <textarea name="globalRulesText" id="globalRulesText" class="form-control" rows="6" placeholder="Enter rules...">${globalRules}</textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save Global Rules</button>
+                                </form>
+                            </div>
+                        </div>`;
+                }
+                else if (paneId === 'manageUsers') {
+                    const snap = await get(ref(db, 'users'));
+                    let rows = '';
+                    if(snap.exists()) snap.forEach(s => {
+                        const u = s.val();
+                        const avatarUrl = u.profilePicUrl || 'https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(u.displayName || 'Gamer');
+                        rows += `
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="${avatarUrl}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 50%; border: 1px solid var(--border-color);">
+                                        <div>
+                                            <strong>${u.displayName || 'No Name'}</strong><br>
+                                            <small class="text-secondary">${u.email}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${u.phone || 'N/A'}</td>
+                                <td>₹${parseFloat(u.balance || 0).toFixed(2)}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary me-1" onclick="editUserBalance('${s.key}', ${parseFloat(u.balance || 0)}, '${u.displayName || 'User'}')"><i class="bi bi-pencil-fill"></i> Balance</button>
+                                    <button class="btn btn-sm btn-warning me-1" onclick="editUserStats('${s.key}', ${u.totalKills || 0}, ${u.totalWon || 0}, '${u.displayName || 'User'}')"><i class="bi bi-trophy-fill"></i> Stats</button>
+                                    <button class="btn btn-sm btn-info text-white" onclick="viewUserTransactions('${s.key}', '${u.displayName || 'User'}')"><i class="bi bi-eye"></i> Tx Logs</button>
+                                </td>
+                            </tr>`;
                     });
+                    content = `
+                        <div class="card"><div class="card-body"><h4 class="card-title">All Users</h4><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Player Info</th><th>Phone</th><th>Balance</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div></div></div>
+                        <div id="userTransactionsViewer"></div>`;
+                }
+                else if (paneId === 'manageRequests') {
+                    const usersSnap = await get(ref(db, 'users'));
+                    let rows = '';
+                    if (usersSnap.exists()) {
+                        usersSnap.forEach(userSnap => {
+                            const uid = userSnap.key;
+                            const u = userSnap.val();
+                            if (u.transactions) {
+                                Object.entries(u.transactions).forEach(([txId, tx]) => {
+                                    if (tx.status === 'pending') {
+                                        const date = tx.timestamp ? new Date(tx.timestamp).toLocaleString() : 'N/A';
+                                        let details = tx.type === 'deposit' ? `UTR: ${tx.utr || 'N/A'}` : `UPI: ${tx.upiId || 'N/A'}`;
+                                        
+                                        if (tx.screenshotUrl) {
+                                            details += `<br><a href="${tx.screenshotUrl}" target="_blank" class="btn btn-sm btn-outline-info py-0 px-2 mt-1 d-inline-flex align-items-center gap-1" style="font-size:0.75rem;"><i class="bi bi-image"></i> View Screenshot</a>`;
+                                        }
+                                        
+                                        rows += `
+                                            <tr>
+                                                <td><strong>${u.displayName || 'Gamer'}</strong><br><small class="text-secondary">${u.email}</small></td>
+                                                <td><span class="badge ${tx.type === 'deposit' ? 'bg-success' : 'bg-danger'}">${tx.type.toUpperCase()}</span></td>
+                                                <td class="fw-bold">₹${tx.amount}</td>
+                                                <td><small class="text-secondary">${details}</small></td>
+                                                <td><small class="text-secondary">${date}</small></td>
+                                                <td>
+                                                    <select class="form-select form-select-sm request-status-select" 
+                                                            data-uid="${uid}" 
+                                                            data-txid="${txId}" 
+                                                            data-amount="${tx.amount}" 
+                                                            data-type="${tx.type}"
+                                                            data-current-status="pending">
+                                                        <option value="pending" selected>Pending</option>
+                                                        <option value="completed">Completed (Approve)</option>
+                                                        <option value="failed">Failed (Reject)</option>
+                                                    </select>
+                                                </td>
+                                            </tr>`;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    if (!rows) {
+                        rows = `<tr><td colspan="6" class="text-center text-secondary py-4">No pending payment requests found!</td></tr>`;
+                    }
+                    content = `
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">Pending Payment Requests</h4>
+                                <div class="table-responsive">
+                                    <table class="table align-middle text-start">
+                                        <thead><tr><th>User</th><th>Type</th><th>Amount</th><th>Details</th><th>Date</th><th>Action</th></tr></thead>
+                                        <tbody>${rows}</tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+                else if (paneId === 'manageFinancials') {
+                    const settingsSnap = await get(ref(db, 'settings'));
+                    const config = settingsSnap.exists() ? settingsSnap.val() : {};
+                    
+                    content = `
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title"><i class="bi bi-cash-coin me-2"></i>Financial Limits & Referral Settings</h4>
+                                <form id="financialsForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3"><label class="form-label fw-bold">Minimum Deposit Amount (Coins)</label><input name="minDeposit" type="number" class="form-control" value="${config.minDeposit || 10}" min="1" required></div>
+                                        <div class="col-md-6 mb-3"><label class="form-label fw-bold">Minimum Withdrawal Amount (Coins)</label><input name="minWithdrawal" type="number" class="form-control" value="${config.minWithdrawal || 50}" min="1" required></div>
+                                        <div class="col-md-6 mb-3"><label class="form-label fw-bold">Referral Bonus (Coins)</label><input name="referralReward" type="number" class="form-control" value="${config.referralReward || 10}" min="0" required></div>
+                                        <div class="col-md-6 mb-3"><label class="form-label fw-bold">Official Deposit UPI ID</label><input name="depositUpiId" type="text" class="form-control" value="${config.depositUpiId || ''}" placeholder="e.g. pay@upi" required></div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100 py-2 mt-3">Save Financial Settings</button>
+                                </form>
+                            </div>
+                        </div>`;
+                }
+                else if (paneId === 'manageTickets') {
+                    const snap = await get(ref(db, 'support_tickets'));
+                    let rows = '';
+                    if (snap.exists()) {
+                        snap.forEach(s => {
+                            const t = s.val();
+                            const date = t.timestamp ? new Date(t.timestamp).toLocaleString() : 'N/A';
+                            rows += `
+                                <tr>
+                                    <td>${t.displayName || 'Gamer'} (${t.email || 'N/A'})</td>
+                                    <td><span class="badge bg-secondary">${t.category}</span></td>
+                                    <td>${t.message}</td>
+                                    <td>${date}</td>
+                                    <td>
+                                        <select class="form-select form-select-sm ticket-status-select" data-id="${s.key}">
+                                            <option value="open" ${t.status === 'open' ? 'selected' : ''}>Open</option>
+                                            <option value="closed" ${t.status === 'closed' ? 'selected' : ''}>Closed</option>
+                                        </select>
+                                    </td>
+                                    <td><button class="btn btn-sm btn-outline-danger delete-btn" data-type="support_tickets" data-id="${s.key}"><i class="bi bi-trash"></i></button></td>
+                                </tr>`;
+                        });
+                    } else {
+                        rows = `<tr><td colspan="6" class="text-center text-secondary py-3">No active tickets found.</td></tr>`;
+                    }
+                    content = `
+                        <div class="card"><div class="card-body"><h4 class="card-title">Support Tickets Help desk</h4><div class="table-responsive"><table class="table align-middle"><thead><tr><th>User</th><th>Category</th><th>Message</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div></div></div>`;
+                }
+                else if (paneId === 'manageAnnouncements') {
+                    const snap = await get(ref(db, 'announcements'));
+                    let rows = '';
+                    if(snap.exists()) snap.forEach(s => {
+                        rows += `<tr><td>${s.val().title}</td><td>${s.val().message}</td><td>${s.val().date || ''}</td><td><button class="btn btn-sm btn-outline-danger delete-btn" data-type="announcements" data-id="${s.key}"><i class="bi bi-trash"></i></button></td></tr>`;
+                    });
+                    content = `
+                        <div class="card mb-4"><div class="card-body"><h4 class="card-title">Add Announcement</h4><form id="addForm"><div class="mb-2"><label>Title</label><input name="title" type="text" class="form-control" required></div><div class="mb-3"><label>Message</label><textarea name="message" class="form-control" rows="3" required></textarea></div><button type="submit" class="btn btn-primary">Publish Announcement</button></form></div></div>
+                        <div class="card"><div class="card-body"><h4 class="card-title">Active Announcements</h4><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Title</th><th>Message</th><th>Date</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div></div></div>`;
+                }
+                else if (paneId === 'manageAppThemes') {
+                    const snap = await get(ref(db, 'settings'));
+                    const themeConfig = snap.exists() ? snap.val() : {};
+                    const selectedTheme = themeConfig.appTheme || 'cyberpunk';
+                    
+                    content = `
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title">User Mobile App Theme Settings</h4>
+                                <form id="addForm">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Active Player App Theme</label>
+                                        <select name="selectedTheme" id="selectedThemeSelect" class="form-select" required>
+                                            <option value="cyberpunk" ${selectedTheme === 'cyberpunk' ? 'selected' : ''}>Standard Dark Violet (Pink & Cyan Buttons)</option>
+                                            <option value="light" ${selectedTheme === 'light' ? 'selected' : ''}>Standard Light Theme</option>
+                                            <option value="dark" ${selectedTheme === 'dark' ? 'selected' : ''}>Standard Dark slate Theme</option>
+                                            <option value="toxic" ${selectedTheme === 'toxic' ? 'selected' : ''}>Toxic Green Theme</option>
+                                            <option value="custom" ${selectedTheme === 'custom' ? 'selected' : ''}>Custom Hex Colors</option>
+                                        </select>
+                                    </div>
+
+                                    <div id="customColorsSection" style="${selectedTheme === 'custom' ? 'display: block;' : 'display: none;'}">
+                                        <hr class="my-4">
+                                        <h5 class="mb-3 text-primary">Custom App Palette</h5>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3"><label class="form-label">Primary Brand Color</label><div class="d-flex gap-2"><input type="color" name="primaryColor" class="form-control form-control-color" value="${themeConfig.primaryColor || '#FF007F'}"><input type="text" class="form-control hex-text" value="${themeConfig.primaryColor || '#FF007F'}" placeholder="#FF007F" maxlength="7"></div></div>
+                                            <div class="col-md-6 mb-3"><label class="form-label">Accent Color</label><div class="d-flex gap-2"><input type="color" name="secondaryColor" class="form-control form-control-color" value="${themeConfig.secondaryColor || '#00F0FF'}"><input type="text" class="form-control hex-text" value="${themeConfig.secondaryColor || '#00F0FF'}" placeholder="#00F0FF" maxlength="7"></div></div>
+                                            <div class="col-md-6 mb-3"><label class="form-label">Player App Background Color</label><div class="d-flex gap-2"><input type="color" name="backgroundColor" class="form-control form-control-color" value="${themeConfig.backgroundColor || '#0F0C20'}"><input type="text" class="form-control hex-text" value="${themeConfig.backgroundColor || '#0F0C20'}" placeholder="#0F0C20" maxlength="7"></div></div>
+                                            <div class="col-md-6 mb-3"><label class="form-label">Primary Font/Text Color</label><div class="d-flex gap-2"><input type="color" name="textColor" class="form-control form-control-color" value="${themeConfig.textColor || '#FFFFFF'}"><input type="text" class="form-control hex-text" value="${themeConfig.textColor || '#FFFFFF'}" placeholder="#FFFFFF" maxlength="7"></div></div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary w-100 py-2 mt-3">Publish Themes Update to App</button>
+                                </form>
+                            </div>
+                        </div>`;
+                }
+                else if (paneId === 'manageSettings') {
+                    const snap = await get(ref(db, 'settings'));
+                    const config = snap.exists() ? snap.val() : {};
+                    
+                    content = `
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title">User App Logo & Support Settings</h4>
+                                <form id="addForm">
+                                    <div class="mb-3"><label class="form-label">User App Logo URL</label><input name="userAppLogoUrl" type="url" class="form-control" value="${config.userAppLogoUrl || ''}"></div>
+                                    <div class="mb-3"><label class="form-label">Telegram / WhatsApp Support URL</label><input name="customerSupportUrl" type="url" class="form-control" value="${config.customerSupportUrl || ''}"></div>
+
+                                    <div class="mb-3"><label class="form-label">Player App Start Splash Welcome Image URL (ReadOnly)</label><input name="splashImageUrl" id="splashImageUrlInput" type="url" class="form-control" value="${config.splashImageUrl || ''}" readonly></div>
+                                    <div class="mb-3"><label class="form-label">Upload New Start Splash Welcome Image</label><input name="splashFile" id="splashFile" type="file" class="form-control"><div class="upload-status" id="splashUploadStatus"></div></div>
+
+                                    <hr class="my-4 border-secondary">
+                                    <h4 class="text-primary mb-3">Deposit UPI & QR Settings</h4>
+                                    
+                                    <div class="mb-3"><label class="form-label">Deposit UPI ID</label><input name="depositUpiId" type="text" class="form-control" value="${config.depositUpiId || ''}"></div>
+                                    <div class="mb-3"><label class="form-label">Deposit QR Code URL (ReadOnly)</label><input name="depositQrCodeUrl" id="depositQrCodeUrlInput" type="url" class="form-control" value="${config.depositQrCodeUrl || ''}" readonly></div>
+                                    <div class="mb-3"><label class="form-label">Upload New Deposit QR Image Code</label><input name="depositQrFile" id="depositQrFile" type="file" class="form-control"><div class="upload-status" id="qrUploadStatus"></div></div>
+
+                                    <button type="submit" class="btn btn-primary w-100 py-2">Save All Settings</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- AUTHORIZED ADMIN EMAIL CONFIG -->
+                        <div class="card mb-4" style="border-color: var(--danger-color);">
+                            <div class="card-body">
+                                <h4 class="card-title text-danger"><i class="bi bi-shield-lock-fill"></i> Authorized Admin Email Settings</h4>
+                                <p class="text-secondary small">You can update the authorized admin email address below. Ensure the email is registered in Firebase Auth first.</p>
+                                <form id="changeAdminCredsForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Authorized Admin Email</label>
+                                        <input type="email" id="newAdminEmail" class="form-control" required placeholder="e.g. admin@kkesports.com">
+                                    </div>
+                                    <button type="submit" class="btn btn-danger w-100 py-2">Update Authorized Admin Email</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- CHANGE ADMIN PASSWORD SECTION -->
+                        <div class="card mb-4" style="border-color: var(--danger-color);">
+                            <div class="card-body">
+                                <h4 class="card-title text-danger"><i class="bi bi-key-fill"></i> Change Admin Password</h4>
+                                <p class="text-secondary small">Update your master admin account password securely. You must be signed in recently to perform this action.</p>
+                                <form id="changeAdminPasswordForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">New Password</label>
+                                        <input type="text" id="newAdminPasswordInput" class="form-control" required minlength="6" placeholder="Minimum 6 characters">
+                                    </div>
+                                    <button type="submit" class="btn btn-danger w-100 py-2">Update Admin Password</button>
+                                </form>
+                            </div>
+                        </div>`;
                 }
 
-                // CHANGE ADMIN PASSWORD HANDLER
-                const passwordForm = getElement('changeAdminPasswordForm');
-                if (passwordForm) {
-                    passwordForm.addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        showLoader(true);
-                        const newPassword = getElement('newAdminPasswordInput').value;
-                        const user = auth.currentUser;
-                        if (user) {
-                            try {
-                                await updatePassword(user, newPassword);
-                                
-                                const freshSnap = await get(ref(db, 'admin'));
-                                const currentEmail = freshSnap.exists() ? (freshSnap.val().email || '') : '';
-                                
-                                await set(ref(db, 'admin'), {
-                                    username: currentEmail.split('@')[0],
-                                    password: newPassword,
-                                    email: currentEmail,
-                                    uid: user.uid
-                                });
+                paneContainer.innerHTML = content;
 
-                                showStatus('Admin password updated successfully! Please login again with your new password.', 'success');
+                // Attach Event Listeners on newly rendered HTML Elements
+                attachFormListeners(paneId);
+                attachStatusSelectListeners();
+                attachTicketListeners();
+                attachRequestListeners();
+                attachStaffFormListeners(paneId);
+
+                // CHANGE ADMIN EMAIL SUBMIT HANDLER
+                if (paneId === 'manageSettings') {
+                    const credsForm = getElement('changeAdminCredsForm');
+                    if (credsForm) {
+                        const adminSnap = await get(ref(db, 'admin'));
+                        if (adminSnap.exists()) {
+                            getElement('newAdminEmail').value = adminSnap.val().email || '';
+                        }
+
+                        credsForm.addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            showLoader(true);
+                            const newEmail = getElement('newAdminEmail').value.trim();
+                            try {
+                                const freshSnap = await get(ref(db, 'admin'));
+                                const currentPassword = freshSnap.exists() ? (freshSnap.val().password || 'admin123') : 'admin123';
+                                
+                                // Secure sync update of Authentication identity with Realtime Database
+                                const user = auth.currentUser;
+                                if (user) {
+                                    await updateEmail(user, newEmail);
+                                }
+
+                                await set(ref(db, 'admin'), {
+                                    username: newEmail.split('@')[0],
+                                    password: currentPassword,
+                                    email: newEmail,
+                                    uid: auth.currentUser.uid
+                                });
+                                showStatus('Authorized Admin Email updated successfully! Logging out in 2 seconds...', 'success');
                                 setTimeout(() => { performLogout(); }, 2000);
                             } catch(err) {
                                 if (err.code === 'auth/requires-recent-login') {
-                                    showStatus('For security, please log out and log back in before changing your password.', 'danger');
+                                    showStatus('For security, please log out and log back in before updating email.', 'danger');
                                 } else {
-                                    showStatus('Failed to update password: ' + err.message, 'danger');
+                                    showStatus('Failed to update email: ' + err.message, 'danger');
                                 }
                             } finally {
                                 showLoader(false);
                             }
-                        } else {
-                            showLoader(false);
-                            showStatus('User session not found.', 'danger');
-                        }
-                    });
-                }
-            }
+                        });
+                    }
 
-            // AUTO MATCH SCHEDULER BINDINGS
-            if (paneId === 'manageMatches') {
-                const autoForm = getElement('autoScheduleForm');
-                if (autoForm) {
-                    autoForm.addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        const dateVal = getElement('autoScheduleDate').value; 
-                        const gameId = getElement('autoScheduleGameId').value;
-                        const baseFee = parseFloat(getElement('autoScheduleFee').value) || 5;
-                        const basePrize = parseFloat(getElement('autoSchedulePrize').value) || 10;
-                        const startTimeVal = getElement('autoScheduleStartTime').value; 
-                        const endTimeVal = getElement('autoScheduleEndTime').value; 
-                        const interval = parseInt(getElement('autoScheduleInterval').value) || 60;
-                        const spots = parseInt(getElement('autoScheduleSpots').value) || 2;
-                        const matchType = getElement('autoScheduleType').value || "Solo";
+                    // CHANGE ADMIN PASSWORD HANDLER
+                    const passwordForm = getElement('changeAdminPasswordForm');
+                    if (passwordForm) {
+                        passwordForm.addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            showLoader(true);
+                            const newPassword = getElement('newAdminPasswordInput').value;
+                            const user = auth.currentUser;
+                            if (user) {
+                                try {
+                                    await updatePassword(user, newPassword);
+                                    
+                                    const freshSnap = await get(ref(db, 'admin'));
+                                    const currentEmail = freshSnap.exists() ? (freshSnap.val().email || '') : '';
+                                    
+                                    await set(ref(db, 'admin'), {
+                                        username: currentEmail.split('@')[0],
+                                        password: newPassword,
+                                        email: currentEmail,
+                                        uid: user.uid
+                                    });
 
-                        const [sh, sm] = startTimeVal.split(':').map(Number);
-                        const [eh, em] = endTimeVal.split(':').map(Number);
-                        
-                        const startMinutes = (sh * 60) + sm;
-                        const endMinutes = (eh * 60) + em;
-
-                        showLoader(true);
-                        try {
-                            const gameSelectEl = getElement('autoScheduleGameId');
-                            const categoryNameText = gameSelectEl.options[gameSelectEl.selectedIndex].text;
-
-                            let count = 1;
-                            for (let curr = startMinutes; curr <= endMinutes; curr += interval) {
-                                const hour = Math.floor(curr / 60);
-                                const minute = curr % 60;
-                                const hourStr = hour < 10 ? '0' + hour : '' + hour;
-                                const minStr = minute < 10 ? '0' + minute : '' + minute;
-                                const matchTime = `${dateVal}T${hourStr}:${minStr}`;
-                                const matchName = `CUSTOM ${categoryNameText.toUpperCase()} (Battle #${count})`;
-
-                                const newRef = push(ref(db, 'tournaments'));
-                                await set(newRef, {
-                                    gameId, name: matchName, entryFee: baseFee, prizePool: basePrize, perKill: 0,
-                                    map: "Bermuda", matchType, totalSpots: spots, dateTime: matchTime, status: 'upcoming', bannerUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=600"
-                                });
-                                count++;
+                                    showStatus('Admin password updated successfully! Please login again with your new password.', 'success');
+                                    setTimeout(() => { performLogout(); }, 2000);
+                                } catch(err) {
+                                    if (err.code === 'auth/requires-recent-login') {
+                                        showStatus('For security, please log out and log back in before changing your password.', 'danger');
+                                    } else {
+                                        showStatus('Failed to update password: ' + err.message, 'danger');
+                                    }
+                                } finally {
+                                    showLoader(false);
+                                }
+                            } else {
+                                showLoader(false);
+                                showStatus('User session not found.', 'danger');
                             }
-                            showStatus(`Generated ${count-1} matches successfully!`, 'success');
-                            renderManagementPane('manageMatches');
-                        } catch(err) {
-                            showStatus('Error scheduling: ' + err.message, 'danger');
-                        } finally { showLoader(false); }
-                    });
+                        });
+                    }
                 }
-            }
 
-            if (paneId === 'manageRules') {
-                const globalForm = getElement('globalRulesForm');
-                if (globalForm) {
-                    globalForm.addEventListener('submit', async (e) => {
-                        e.preventDefault(); showLoader(true);
-                        const rules = getElement('globalRulesText').value.trim();
-                        try {
-                            const [settingsSnap, appSettingsSnap] = await Promise.all([get(ref(db, 'settings')), get(ref(db, 'app_settings'))]);
-                            const currentSettings = settingsSnap.exists() ? settingsSnap.val() : {};
-                            const currentAppSettings = appSettingsSnap.exists() ? appSettingsSnap.val() : {};
+                // AUTO MATCH SCHEDULER BINDINGS
+                if (paneId === 'manageMatches') {
+                    const autoForm = getElement('autoScheduleForm');
+                    if (autoForm) {
+                        autoForm.addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const dateVal = getElement('autoScheduleDate').value; 
+                            const gameId = getElement('autoScheduleGameId').value;
+                            const baseFee = parseFloat(getElement('autoScheduleFee').value) || 5;
+                            const basePrize = parseFloat(getElement('autoSchedulePrize').value) || 10;
+                            const startTimeVal = getElement('autoScheduleStartTime').value; 
+                            const endTimeVal = getElement('autoScheduleEndTime').value; 
+                            const interval = parseInt(getElement('autoScheduleInterval').value) || 60;
+                            const spots = parseInt(getElement('autoScheduleSpots').value) || 2;
+                            const matchType = getElement('autoScheduleType').value || "Solo";
 
-                            await Promise.all([
-                                set(ref(db, 'settings'), { ...currentSettings, rules }),
-                                set(ref(db, 'app_settings'), { ...currentAppSettings, rules })
-                            ]);
-                            showStatus('Global rules saved!', 'success');
-                        } catch(err) {
-                            showStatus('Failed: ' + err.message, 'danger');
-                        } finally { showLoader(false); }
-                    });
+                            const [sh, sm] = startTimeVal.split(':').map(Number);
+                            const [eh, em] = endTimeVal.split(':').map(Number);
+                            
+                            const startMinutes = (sh * 60) + sm;
+                            const endMinutes = (eh * 60) + em;
+
+                            showLoader(true);
+                            try {
+                                const gameSelectEl = getElement('autoScheduleGameId');
+                                const categoryNameText = gameSelectEl.options[gameSelectEl.selectedIndex].text;
+
+                                let count = 1;
+                                for (let curr = startMinutes; curr <= endMinutes; curr += interval) {
+                                    const hour = Math.floor(curr / 60);
+                                    const minute = curr % 60;
+                                    const hourStr = hour < 10 ? '0' + hour : '' + hour;
+                                    const minStr = minute < 10 ? '0' + minute : '' + minute;
+                                    const matchTime = `${dateVal}T${hourStr}:${minStr}`;
+                                    const matchName = `CUSTOM ${categoryNameText.toUpperCase()} (Battle #${count})`;
+
+                                    const newRef = push(ref(db, 'tournaments'));
+                                    await set(newRef, {
+                                        gameId, name: matchName, entryFee: baseFee, prizePool: basePrize, perKill: 0,
+                                        map: "Bermuda", matchType, totalSpots: spots, dateTime: matchTime, status: 'upcoming', bannerUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=600"
+                                    });
+                                    count++;
+                                }
+                                showStatus(`Generated ${count-1} matches successfully!`, 'success');
+                                renderManagementPane('manageMatches');
+                            } catch(err) {
+                                showStatus('Error scheduling: ' + err.message, 'danger');
+                            } finally { showLoader(false); }
+                        });
+                    }
                 }
-            }
 
-            if (paneId === 'manageAppThemes') {
-                const selectEl = getElement('selectedThemeSelect');
-                const customSec = getElement('customColorsSection');
-                if (selectEl && customSec) {
-                    selectEl.addEventListener('change', (e) => {
-                        customSec.style.display = e.target.value === 'custom' ? 'block' : 'none';
-                    });
+                if (paneId === 'manageRules') {
+                    const globalForm = getElement('globalRulesForm');
+                    if (globalForm) {
+                        globalForm.addEventListener('submit', async (e) => {
+                            e.preventDefault(); showLoader(true);
+                            const rules = getElement('globalRulesText').value.trim();
+                            try {
+                                const [settingsSnap, appSettingsSnap] = await Promise.all([get(ref(db, 'settings')), get(ref(db, 'app_settings'))]);
+                                const currentSettings = settingsSnap.exists() ? settingsSnap.val() : {};
+                                const currentAppSettings = appSettingsSnap.exists() ? appSettingsSnap.val() : {};
+
+                                await Promise.all([
+                                    set(ref(db, 'settings'), { ...currentSettings, rules }),
+                                    set(ref(db, 'app_settings'), { ...currentAppSettings, rules })
+                                ]);
+                                showStatus('Global rules saved!', 'success');
+                            } catch(err) {
+                                showStatus('Failed: ' + err.message, 'danger');
+                            } finally { showLoader(false); }
+                        });
+                    }
                 }
-            }
 
-            attachFormListeners(paneId);
-            attachStatusSelectListeners();
-            attachTicketListeners();
-            attachRequestListeners();
-            attachStaffFormListeners(paneId);
+                if (paneId === 'manageAppThemes') {
+                    const selectEl = getElement('selectedThemeSelect');
+                    const customSec = getElement('customColorsSection');
+                    if (selectEl && customSec) {
+                        selectEl.addEventListener('change', (e) => {
+                            customSec.style.display = e.target.value === 'custom' ? 'block' : 'none';
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error("Error rendering pane:", err);
+                paneContainer.innerHTML = `<div class="alert alert-danger m-3">Failed to load content: ${err.message}</div>`;
+            }
         }
 
         // STAFF ACTIONS
@@ -1857,7 +1862,7 @@
             document.querySelectorAll('.request-status-select').forEach(sel => {
                 sel.onchange = async (e) => {
                     const targetUid = e.target.dataset.uid;
-                    const txId = e.target.dataset.txid;
+                    const txId = e.target.dataset.txid; 
                     const txType = e.target.dataset.type;
                     const txAmountRaw = e.target.dataset.amount;
                     const oldStatus = e.target.dataset.currentStatus;
