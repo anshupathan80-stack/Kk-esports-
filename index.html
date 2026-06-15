@@ -1685,23 +1685,31 @@
                 sliderWrapper.innerHTML = '';
                 if (snapshot.exists()) {
                     const promotions = snapshot.val();
-                    Object.values(promotions).forEach(promo => {
-                        if (promo.imageUrl) {
+                    const promoList = Object.values(promotions).filter(promo => promo && promo.imageUrl);
+                    
+                    if (promoList.length > 0) {
+                        promoList.forEach(promo => {
                             sliderWrapper.innerHTML += `<div class="swiper-slide"><a href="${promo.link || '#'}"><img src="${promo.imageUrl}" alt="Promotion"></a></div>`;
+                        });
+                        
+                        if (sliderContainer.swiper) {
+                            sliderContainer.swiper.destroy(true, true);
                         }
-                    });
-                    if (sliderContainer.swiper) {
-                        sliderContainer.swiper.destroy(true, true);
+                        
+                        // DYNAMIC FIX: Only enable loop and autoplay if there are more than 1 promotion banners
+                        const slideCount = promoList.length;
+                        new Swiper(sliderContainer, {
+                            slidesPerView: 1,
+                            spaceBetween: 15,
+                            centeredSlides: true,
+                            loop: slideCount > 1,
+                            autoplay: slideCount > 1 ? { delay: 2500, disableOnInteraction: false } : false,
+                            pagination: slideCount > 1 ? { el: '.swiper-pagination', clickable: true } : false,
+                        });
+                        sliderContainer.style.display = 'block';
+                    } else {
+                        sliderContainer.style.display = 'none';
                     }
-                    new Swiper(sliderContainer, {
-                        slidesPerView: 1,
-                        spaceBetween: 15,
-                        centeredSlides: true,
-                        loop: true,
-                        autoplay: { delay: 2500, disableOnInteraction: false },
-                        pagination: { el: '.swiper-pagination', clickable: true },
-                    });
-                    sliderContainer.style.display = 'block';
                 } else {
                     sliderContainer.style.display = 'none';
                 }
