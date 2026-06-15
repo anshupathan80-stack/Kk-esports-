@@ -51,7 +51,6 @@
         .app-header .header-back-button { background: none; border: none; color: var(--text-primary); font-size: 1.4rem; display: none; }
         .app-header .header-page-title { font-size: 1.25rem; font-weight: 800; display: none; background: linear-gradient(to right, var(--text-primary), var(--accent-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .user-info { display: flex; align-items: center; gap: 0.75rem; }
-        
         .user-avatar { 
             width: 44px; height: 44px; border-radius: 50%; 
             background-color: var(--accent-primary); 
@@ -62,33 +61,16 @@
             text-transform: uppercase; 
             overflow: hidden;
         }
-        
-        /* RESTORED ALIGNMENT FOR WELCOME GREETING */
-        .welcome-text {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            line-height: 1.25;
-            max-width: 140px;
-        }
-        .welcome-text h2 { font-size: 0.75rem; font-weight: 500; margin: 0; color: var(--text-secondary); white-space: nowrap; }
-        .welcome-text p { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin: 0; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        /* RESTORED ORIGINAL WALLET CHIP AND PLUS ICON */
+        .welcome-text h2 { font-size: 0.95rem; font-weight: 600; margin: 0; color: var(--text-primary); }
+        .welcome-text p { font-size: 0.75rem; color: var(--text-secondary); margin: 0; }
         .wallet-button { 
             display: flex; align-items: center; gap: 0.5rem; 
-            background: linear-gradient(135deg, var(--accent-pink), var(--accent-red)) !important; 
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-red)); 
             padding: 0.5rem 0.9rem; border-radius: 50px; 
-            font-weight: 800; font-size: 0.85rem; border: none; color: white !important; 
+            font-weight: 800; font-size: 0.85rem; border: none; color: white; 
             text-decoration: none; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
         }
-        .wallet-button .plus-icon { 
-            background-color: #fff !important; 
-            color: var(--accent-red) !important; 
-            border-radius: 50%; width: 18px; height: 18px; 
-            display: inline-flex !important; justify-content: center; align-items: center; 
-            font-weight: bold; 
-        }
+        .wallet-button .plus-icon { background-color: #fff; color: var(--accent-red); border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; font-weight: bold; }
         
         /* UNIQUE PREMIUM GOLD COIN EMBED STYLING */
         .game-coin {
@@ -295,9 +277,9 @@
         .close-modal { position: absolute; top: 10px; right: 15px; font-size: 1.6rem; color: var(--text-secondary); cursor: pointer; }
         .close-modal:hover { color: var(--text-primary); }
 
-        /* UNIFIED SPLASH SCREEN OVERLAY */
+        /* LOADER / SPLASH SCREEN WRAPPER WITH SMOOTH FADE TRANSITION */
         #globalLoaderEl { 
-            background: #000000 !important; /* Pure Black Background for Splash Screen */
+            background: var(--bg-primary); 
             display: flex; 
             position: fixed; 
             top: 0; left: 0; 
@@ -306,21 +288,12 @@
             justify-content: center; 
             align-items: center;
             transition: opacity 0.5s ease, visibility 0.5s ease;
-            margin: 0; padding: 0; border: none;
         }
-        .fancy-spinner { display: none !important; } /* Hidden Spinner to avoid double loader circle */
-
-        /* TRANSACTION PROCESSING OVERLAY SPIN */
-        #transactionOverlayLoader {
-            background: rgba(0,0,0,0.4);
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            z-index: 10001;
-            justify-content: center;
-            align-items: center;
-        }
+        .fancy-spinner { width: 5rem; height: 5rem; border-radius: 50%; border: 3px solid var(--border-color); border-top-color: var(--accent-primary); animation: spin 1s ease-in-out infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .btn-glow { background: linear-gradient(135deg, var(--accent-primary), #1D4ED8); border: none; color: #FFFFFF; font-weight: 800; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); border-radius: 8px; }
+        .btn-glow:hover { transform: scale(1.01); color: #FFFFFF; }
 
         /* PROFILE SCREEN DESIGN WITH CAMERA OVERLAY */
         .profile-card { background-color: var(--bg-secondary); border-radius: 16px; padding: 1.25rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color); }
@@ -375,10 +348,15 @@
 
         /* Forms Styling */
         .form-control, .form-select { background-color: var(--bg-secondary) !important; border: 1px solid var(--border-color) !important; color: var(--text-primary) !important; }
-        .form-control:focus, .form-select:focus { border-color: var(--accent-primary) !important; box-shadow: 0 0 8px rgba(93, 0, 255, 0.15) !important; }
+        .form-control:focus, .form-select:focus { border-color: var(--accent-primary) !important; box-shadow: 0 0 8px rgba(37, 99, 235, 0.2) !important; }
         .form-label { color: var(--text-secondary) !important; font-weight: 500; }
         .form-control::placeholder { color: #9CA3AF !important; opacity: 1 !important; }
         
+        /* TYPOGRAPHIC DESIGN LOGO */
+        .logo-container-glow { display: inline-flex; flex-direction: column; justify-content: center; align-items: center; width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, #FFFFFF, #F3F4F6); border: 3px solid var(--accent-primary); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.15); user-select: none; margin-bottom: 1.5rem; }
+        .logo-text-title { font-size: 1.8rem; font-weight: 800; line-height: 1; color: var(--text-primary); text-shadow: 0 0 8px rgba(37, 99, 235, 0.15); letter-spacing: -1px; }
+        .logo-text-subtitle { font-size: 0.65rem; font-weight: 700; color: var(--accent-red); letter-spacing: 2px; margin-top: 2px; text-shadow: 0 0 5px rgba(220, 38, 38, 0.15); }
+
         .section-header h2 { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; letter-spacing: 0.5px; text-transform: uppercase; }
         .section-header p { font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
         
@@ -644,88 +622,16 @@
         }
         .or-divider:not(:empty)::before { margin-right: .8em; }
         .or-divider:not(:empty)::after { margin-left: .8em; }
-
-        /* CUSTOM MODERN LOGIN & SIGNUP PALETTE OVERRIDES */
-        #login-section {
-            background-color: #FFFFFF !important;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 30px 10px;
-        }
-        .modern-auth-title-container {
-            text-align: left;
-            padding-left: 5px;
-            margin-bottom: 40px;
-        }
-        .modern-auth-title {
-            color: #5D00FF !important; /* Premium Indigo Purple */
-            font-size: 2.3rem;
-            font-weight: 800;
-            line-height: 1.15;
-            margin: 0;
-            letter-spacing: -0.5px;
-        }
-        .modern-input {
-            border-radius: 30px !important;
-            height: 52px !important;
-            padding: 0 24px !important;
-            border: 1px solid #E2E8F0 !important;
-            background-color: #FFFFFF !important;
-            font-size: 0.95rem !important;
-            color: #1E293B !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.01) !important;
-        }
-        .modern-input:focus {
-            border-color: #5D00FF !important;
-            box-shadow: 0 0 8px rgba(93, 0, 255, 0.15) !important;
-        }
-        .modern-input::placeholder {
-            color: #94A3B8 !important;
-            opacity: 1 !important;
-        }
-        .modern-btn {
-            border-radius: 30px !important;
-            height: 52px !important;
-            background: #5D00FF !important; /* Solid Violet Button */
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-            font-size: 1.05rem !important;
-            letter-spacing: 0.5px;
-            border: none !important;
-            text-transform: uppercase;
-            box-shadow: 0 6px 20px rgba(93, 0, 255, 0.2) !important;
-            transition: all 0.2s ease;
-        }
-        .modern-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 25px rgba(93, 0, 255, 0.3) !important;
-        }
-        .modern-auth-footer {
-            margin-top: 30px;
-            font-size: 0.92rem;
-            color: #64748B;
-        }
-        .modern-auth-link {
-            color: #5D00FF !important;
-            font-weight: 700;
-            text-decoration: none !important;
-        }
     </style>
 </head>
 <body>
 
-    <!-- DYNAMIC SPLASH OVERLAY WRAPPER -->
+    <!-- UPDATED FADE-IN SPLASH WELCOME BANNERS & LOGO (INSTANT 0ms CACHE & ERROR-SAFE RECOVERY) -->
     <div id="globalLoaderEl">
-        <div id="splashScreenContainer" style="width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; margin:0; padding:0;">
-            <img id="splashScreenImg" src="" alt="Welcome" style="width: 100vw; height: 100vh; object-fit: cover; display: none; margin:0; padding:0; border:none;">
+        <div id="splashScreenContainer" style="width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;">
+            <img id="splashScreenImg" src="" alt="Welcome" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+            <div id="splashDefaultSpinner" class="fancy-spinner"></div>
         </div>
-    </div>
-
-    <!-- TRANSACTION / DATABASE ACTION SPIN OVERLAY -->
-    <div id="transactionOverlayLoader">
-        <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;"></div>
     </div>
 
     <header class="app-header">
@@ -734,7 +640,7 @@
             <div class="user-info" id="headerUserInfo">
                 <div class="user-avatar" id="headerAvatar">GU</div>
                 <div class="welcome-text">
-                    <h2>Welcome Back,</h2>
+                    <h2 id="headerWelcomeText">Welcome Back,</h2>
                     <p id="headerUserGreeting">Guest</p>
                 </div>
             </div>
@@ -817,7 +723,6 @@
         let allTournamentsCache = {};
         let appSettings = {};
         let dbListeners = {};
-        let activeTournamentsListener = null;
         
         // PROFILE MENU BACK NAVIGATION STATE TRACKER
         let cameFromProfile = false;
@@ -887,9 +792,25 @@
         }
 
         const showLoader = (show) => {
-            const txLoader = getElement('transactionOverlayLoader');
-            if (!txLoader) return;
-            txLoader.style.display = show ? 'flex' : 'none';
+            const loaderEl = getElement('globalLoaderEl');
+            if (!loaderEl) return;
+            if (show) {
+                // Return to static spinner view ONLY if splash screen boot has already completed!
+                if (appInitialized) {
+                    const splashImg = getElement('splashScreenImg');
+                    const defaultSpinner = getElement('splashDefaultSpinner');
+                    if (splashImg) splashImg.style.display = 'none';
+                    if (defaultSpinner) defaultSpinner.style.display = 'block';
+                }
+                
+                loaderEl.style.display = 'flex';
+                loaderEl.style.opacity = '1';
+                loaderEl.style.visibility = 'visible';
+            } else {
+                loaderEl.style.opacity = '0';
+                loaderEl.style.visibility = 'hidden';
+                setTimeout(() => { loaderEl.style.display = 'none'; }, 500);
+            }
         };
 
         function showStatusMessage(elementId, message, type = 'danger') {
@@ -998,68 +919,49 @@
             let content = '';
             if (sectionId === 'login-section') {
                 content = `
-                    <div class="container" style="max-width: 450px; width: 100%;">
-                        <form id="emailLoginForm">
-                            <div class="modern-auth-title-container">
-                                <h1 class="modern-auth-title">Welcome to,</h1>
-                                <h1 class="modern-auth-title">Login</h1>
+                    <div class="container" style="max-width: 450px; margin-top: 5vh;">
+                        <div class="text-center mb-4">
+                            <!-- Dynamic App Logo with Custom Dynamic Sizing and Fallback option -->
+                            <img id="loginLogoEl" src="" alt="KK ESPORTS" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--accent-primary); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.25); object-fit: cover; display: none;">
+                            <div id="loginLogoFallback" class="logo-container-glow">
+                                <div class="logo-text-title">KK</div>
+                                <div class="logo-text-subtitle">ESPORTS</div>
                             </div>
-                            
-                            <div class="mb-3">
-                                <input type="email" class="form-control modern-input" id="loginEmailInputEl" placeholder="Username / Email" required>
-                            </div>
-                            <div class="mb-3">
-                                <input type="password" class="form-control modern-input" id="loginPasswordInputEl" placeholder="Password" required>
-                            </div>
-                            
-                            <div id="loginStatusMessageEl" class="alert mt-3" style="display: none;"></div>
-                            <div class="d-grid mt-4">
-                                <button type="button" id="loginEmailBtnEl" class="btn modern-btn">Login</button>
-                            </div>
-                            <div class="text-center modern-auth-footer">
-                                Don't have an account? <a href="#" id="showSignupToggleBtnEl" class="modern-auth-link">Sign Up</a>
-                            </div>
-                        </form>
-                        <form id="emailSignupForm" style="display: none;">
-                            <div class="modern-auth-title-container">
-                                <h1 class="modern-auth-title">Welcome to,</h1>
-                                <h1 class="modern-auth-title">Sign Up</h1>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <input type="text" class="form-control modern-input" id="signupFirstNameInputEl" placeholder="First Name" required>
-                            </div>
-                            <div class="mb-3">
-                                <input type="text" class="form-control modern-input" id="signupLastNameInputEl" placeholder="Last Name" required>
-                            </div>
-                            <div class="mb-3">
-                                <input type="text" class="form-control modern-input" id="signupUsernameInputEl" placeholder="Username" required>
-                            </div>
-                            <div class="mb-3 d-flex gap-2">
-                                <select class="form-select modern-input" style="max-width: 90px; padding: 0 10px !important; text-align: center;" id="signupCountryCode">
-                                    <option value="+91">+91</option>
-                                    <option value="+1">+1</option>
-                                </select>
-                                <input type="tel" class="form-control modern-input flex-grow-1" id="signupPhoneInputEl" placeholder="Mobile" required maxlength="10">
-                            </div>
-                            <div class="mb-3">
-                                <input type="email" class="form-control modern-input" id="signupEmailInputEl" placeholder="Email" required>
-                            </div>
-                            <div class="mb-3">
-                                <input type="password" class="form-control modern-input" id="signupPasswordInputEl" placeholder="Password" required>
-                            </div>
-                            <div class="mb-3">
-                                <input type="text" class="form-control modern-input" id="signupReferralInputEl" placeholder="Referral Code">
-                            </div>
-                            
-                            <div id="signupStatusMessageEl" class="alert mt-3" style="display: none;"></div>
-                            <div class="d-grid mt-4">
-                                <button type="button" id="signupEmailBtnEl" class="btn modern-btn">Sign Up</button>
-                            </div>
-                            <div class="text-center modern-auth-footer">
-                                Have an account? <a href="#" id="showLoginToggleBtnEl" class="modern-auth-link">Sign In</a>
-                            </div>
-                        </form>
+                        </div>
+                        <div class="card custom-card"> <div class="card-body p-4">
+                            <form id="emailLoginForm">
+                                <h2 class="card-title text-center mb-4 text-dark fw-bold">Login</h2>
+                                <div class="mb-3">
+                                    <label for="loginEmailInputEl" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="loginEmailInputEl" placeholder="Enter Gmail Address" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginPasswordInputEl" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="loginPasswordInputEl" placeholder="Enter Password" required>
+                                </div>
+                                <div id="loginStatusMessageEl" class="alert mt-3" style="display: none;"></div>
+                                <div class="d-grid"><button type="button" id="loginEmailBtnEl" class="btn" style="background-color: var(--accent-pink); color: white; font-weight:700;">Login</button></div>
+                                <button type="button" id="showSignupToggleBtnEl" class="btn btn-link d-block text-center mt-2 text-decoration-none" style="color: var(--accent-primary); font-weight:600;">Need an account? Sign Up</button>
+                            </form>
+                            <form id="emailSignupForm" style="display: none;">
+                                <h2 class="card-title text-center mb-4 text-dark fw-bold">Sign Up</h2>
+                                <div class="mb-3">
+                                    <label for="signupNameInputEl" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="signupNameInputEl" placeholder="Enter Full Name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="signupEmailInputEl" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="signupEmailInputEl" placeholder="Enter Gmail Address" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="signupPasswordInputEl" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="signupPasswordInputEl" placeholder="Enter Password" required>
+                                </div>
+                                <div id="signupStatusMessageEl" class="alert mt-3" style="display: none;"></div>
+                                <div class="d-grid"><button type="button" id="signupEmailBtnEl" class="btn" style="background-color: var(--accent-primary); color: white; font-weight:700;">Sign Up</button></div>
+                                <button type="button" id="showLoginToggleBtnEl" class="btn btn-link d-block text-center mt-2 text-decoration-none" style="color: var(--accent-primary); font-weight:600;">Already have an account? Login</button>
+                            </form>
+                        </div></div>
                     </div>`;
             } else if (sectionId === 'home-section') {
                 content = `
@@ -1595,15 +1497,12 @@
             if(dbListeners.userProfile && typeof dbListeners.userProfile === 'function') {
                 dbListeners.userProfile();
             }
-            if(activeTournamentsListener && typeof activeTournamentsListener === 'function') {
-                activeTournamentsListener();
-                activeTournamentsListener = null;
-            }
             dbListeners = {};
         }
 
         // WRAPPED WITH A GLOBAL TRY-CATCH-FINALLY ENGINE BLOCK TO PREVENT INTERRUPTING FADE LOADER TRANSITIONS
         async function handleAuthStateChange(user) {
+            showLoader(true);
             try {
                 detachAllDbListeners(); 
                 currentUser = user;
@@ -1641,6 +1540,7 @@
                     applyDynamicTheme(appSettings);
                     
                     const splashImg = getElement('splashScreenImg');
+                    const defaultSpinner = getElement('splashDefaultSpinner');
                     if (splashImg && appSettings.splashImageUrl) {
                         // Cache Splash URL in localStorage for instantaneous launch next time!
                         localStorage.setItem('cachedSplashImageUrl', appSettings.splashImageUrl);
@@ -1648,16 +1548,23 @@
                         // ASSIGN ONLOAD & ONERROR CALLBACKS BEFORE SETTING SRC KEY (PREVENTS CACHING RACE CONDITION)
                         splashImg.onload = () => {
                             splashImg.style.display = 'block';
+                            if (defaultSpinner) defaultSpinner.style.display = 'none';
+                            
+                            // Triggers dynamic hiding after load in case auth already loaded
                             splashImageProcessed = true;
                             checkAndHideSplash();
                         };
                         splashImg.onerror = () => {
+                            // Fallback safely to loading spinner if the image link is corrupt or broken
                             splashImg.style.display = 'none';
+                            if (defaultSpinner) defaultSpinner.style.display = 'block';
+                            
                             splashImageProcessed = true;
                             checkAndHideSplash();
                         };
                         splashImg.src = appSettings.splashImageUrl;
                     } else {
+                        // No splash set in database, fallback to processed
                         splashImageProcessed = true;
                         checkAndHideSplash();
                     }
@@ -1751,106 +1658,89 @@
             const container = getElement('tournamentsListContainerEl');
             if (!container) return;
             container.innerHTML = `<p class="text-center p-5 text-secondary">Searching battles...</p>`;
-            
-            if (activeTournamentsListener && typeof activeTournamentsListener === 'function') {
-                activeTournamentsListener();
-                activeTournamentsListener = null;
-            }
-
             try {
-                const tournamentsRef = ref(db, 'tournaments');
-                activeTournamentsListener = onValue(tournamentsRef, (tournamentsSnapshot) => {
-                    if (tournamentsSnapshot.exists()) {
-                        allTournamentsCache = tournamentsSnapshot.val();
+                const tournamentsSnapshot = await get(ref(db, 'tournaments'));
+                if (tournamentsSnapshot.exists()) allTournamentsCache = tournamentsSnapshot.val();
+                const filteredMatches = Object.entries(allTournamentsCache)
+                    .filter(([, matchData]) => {
+                        if (!matchData || typeof matchData !== 'object') return false;
+                        const statusMatch = matchData.status === status;
+                        const gameMatch = gameId ? (matchData.gameId === gameId) : true;
+                        const joinMatch = onlyJoined ? (matchData.participants && matchData.participants[currentUser.uid]) : true;
+                        return statusMatch && gameMatch && joinMatch;
+                    });
+                if (filteredMatches.length === 0) { 
+                    const msg = onlyJoined ? `No registered '${status}' matches found.` : `No '${status}' matches found.`;
+                    container.innerHTML = `<p class="text-center p-5 text-secondary">${msg}</p>`; 
+                    return; 
+                }
+                container.innerHTML = '';
+                filteredMatches.forEach(([matchId, matchData]) => {
+                    const participants = matchData.participants || {};
+                    const isJoined = participants[currentUser.uid] ? true : false;
+                    const joinedCount = Object.keys(participants).length;
+                    const totalSpots = matchData.totalSpots || 48;
+                    let actionBtnHtml = '';
+                    if (status === 'upcoming') {
+                        if (isJoined) { actionBtnHtml = `<button class="btn btn-sm btn-secondary py-2 flex-grow-1 fw-bold" style="border-radius:8px; background-color: rgba(255, 255, 255, 0.7); border-color: rgba(0,0,0,0.05); color: #4B5563;" disabled>Registered</button>`; }
+                        else if (joinedCount >= totalSpots) { actionBtnHtml = `<button class="btn btn-sm btn-secondary py-2 flex-grow-1" style="border-radius:8px;" disabled>Slot Full</button>`; }
+                        else { actionBtnHtml = `<button class="btn btn-sm btn-glow btn-join-trigger py-2 flex-grow-1" data-match-id="${matchId}" style="border-radius:8px;">JOIN</button>`; }
+                    } else if (status === 'ongoing') {
+                        actionBtnHtml = `<span class="badge bg-danger py-2 flex-grow-1 d-flex align-items-center justify-content-center" style="border-radius:8px; font-size: 0.85rem;"><i class="fa-solid fa-signal-stream me-1"></i>LIVE</span>`;
                     } else {
-                        allTournamentsCache = {};
+                        actionBtnHtml = `<span class="badge bg-success py-2 flex-grow-1 d-flex align-items-center justify-content-center" style="border-radius:8px; font-size: 0.85rem;">Finished</span>`;
                     }
-
-                    const filteredMatches = Object.entries(allTournamentsCache)
-                        .filter(([, matchData]) => {
-                            if (!matchData || typeof matchData !== 'object') return false;
-                            const statusMatch = matchData.status === status;
-                            const gameMatch = gameId ? (matchData.gameId === gameId) : true;
-                            const joinMatch = onlyJoined ? (matchData.participants && matchData.participants[currentUser.uid]) : true;
-                            return statusMatch && gameMatch && joinMatch;
-                        });
-
-                    if (filteredMatches.length === 0) { 
-                        const msg = onlyJoined ? `No registered '${status}' matches found.` : `No '${status}' matches found.`;
-                        container.innerHTML = `<p class="text-center p-5 text-secondary">${msg}</p>`; 
-                        return; 
-                    }
-
-                    container.innerHTML = '';
-                    filteredMatches.forEach(([matchId, matchData]) => {
-                        const participants = matchData.participants || {};
-                        const isJoined = participants[currentUser.uid] ? true : false;
-                        const joinedCount = Object.keys(participants).length;
-                        const totalSpots = matchData.totalSpots || 48;
-                        let actionBtnHtml = '';
-                        if (status === 'upcoming') {
-                            if (isJoined) { actionBtnHtml = `<button class="btn btn-sm btn-secondary py-2 flex-grow-1 fw-bold" style="border-radius:8px; background-color: rgba(255, 255, 255, 0.7); border-color: rgba(0,0,0,0.05); color: #4B5563;" disabled>Registered</button>`; }
-                            else if (joinedCount >= totalSpots) { actionBtnHtml = `<button class="btn btn-sm btn-secondary py-2 flex-grow-1" style="border-radius:8px;" disabled>Slot Full</button>`; }
-                            else { actionBtnHtml = `<button class="btn btn-sm btn-glow btn-join-trigger py-2 flex-grow-1" data-match-id="${matchId}" style="border-radius:8px;">JOIN</button>`; }
-                        } else if (status === 'ongoing') {
-                            actionBtnHtml = `<span class="badge bg-danger py-2 flex-grow-1 d-flex align-items-center justify-content-center" style="border-radius:8px; font-size: 0.85rem;"><i class="fa-solid fa-signal-stream me-1"></i>LIVE</span>`;
-                        } else {
-                            actionBtnHtml = `<span class="badge bg-success py-2 flex-grow-1 d-flex align-items-center justify-content-center" style="border-radius:8px; font-size: 0.85rem;">Finished</span>`;
-                        }
+                    
+                    const fallbackBanner = "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=600";
+                    const bannerImgUrl = matchData.bannerUrl || matchData.imageUrl || matchData.thumbnailUrl || fallbackBanner;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'tournament-card glowing';
+                    card.style.background = getMapBackground(matchData.map);
+                    card.innerHTML = `
+                        <div class="tournament-card-banner mb-3">
+                            <img src="${bannerImgUrl}" alt="${matchData.name}">
+                        </div>
+                        <div class="mb-2">
+                            <h5 class="mb-0 text-dark fw-bold" style="font-size:1.1rem;">${matchData.name}</h5>
+                        </div>
+                        <div class="tournament-info-grid">
+                            <div class="info-grid-item"><span>PRIZE POOL</span><strong><span class="game-coin"></span>${matchData.prizePool || 0}</strong></div>
+                            <div class="info-grid-item"><span>PER KILL</span><strong><span class="game-coin"></span>${matchData.perKill || 0}</strong></div>
+                            <div class="info-grid-item"><span>ENTRY FEE</span><strong class="text-primary">${matchData.entryFee > 0 ? '<span class="game-coin"></span>' + matchData.entryFee : 'FREE'}</strong></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-1 text-secondary" style="font-size:0.75rem;">
+                            <span><i class="fa-solid fa-map text-secondary me-1"></i>Map: <strong class="text-dark">${matchData.map || 'Bermuda'}</strong></span>
+                            <span><i class="fa-solid fa-gamepad text-secondary me-1"></i>Type: <strong class="text-dark">${matchData.matchType || 'Solo'}</strong></span>
+                        </div>
+                        <div class="spots-info d-flex justify-content-between align-items-center mt-3" style="font-size:0.75rem;">
+                            <span class="text-secondary">${joinedCount}/${totalSpots} Spots Filled</span>
+                            <span class="text-primary fw-bold">${totalSpots - joinedCount} Slots left</span>
+                        </div>
+                        <div class="progress mt-1 mb-3" style="height: 6px; background-color: rgba(255, 255, 255, 0.5); border-radius:10px;">
+                            <div class="progress-bar bg-primary" style="width: ${(joinedCount / totalSpots) * 100}%; border-radius:10px;"></div>
+                        </div>
                         
-                        const fallbackBanner = "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=600";
-                        const bannerImgUrl = matchData.bannerUrl || matchData.imageUrl || matchData.thumbnailUrl || fallbackBanner;
-                        
-                        const card = document.createElement('div');
-                        card.className = 'tournament-card glowing';
-                        card.style.background = getMapBackground(matchData.map);
-                        card.innerHTML = `
-                            <div class="tournament-card-banner mb-3">
-                                <img src="${bannerImgUrl}" alt="${matchData.name}">
-                            </div>
-                            <div class="mb-2">
-                                <h5 class="mb-0 text-dark fw-bold" style="font-size:1.1rem;">${matchData.name}</h5>
-                            </div>
-                            <div class="tournament-info-grid">
-                                <div class="info-grid-item"><span>PRIZE POOL</span><strong><span class="game-coin"></span>${matchData.prizePool || 0}</strong></div>
-                                <div class="info-grid-item"><span>PER KILL</span><strong><span class="game-coin"></span>${matchData.perKill || 0}</strong></div>
-                                <div class="info-grid-item"><span>ENTRY FEE</span><strong class="text-primary">${matchData.entryFee > 0 ? '<span class="game-coin"></span>' + matchData.entryFee : 'FREE'}</strong></div>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-1 text-secondary" style="font-size:0.75rem;">
-                                <span><i class="fa-solid fa-map text-secondary me-1"></i>Map: <strong class="text-dark">${matchData.map || 'Bermuda'}</strong></span>
-                                <span><i class="fa-solid fa-gamepad text-secondary me-1"></i>Type: <strong class="text-dark">${matchData.matchType || 'Solo'}</strong></span>
-                            </div>
-                            <div class="spots-info d-flex justify-content-between align-items-center mt-3" style="font-size:0.75rem;">
-                                <span class="text-secondary">${joinedCount}/${totalSpots} Spots Filled</span>
-                                <span class="text-primary fw-bold">${totalSpots - joinedCount} Slots left</span>
-                            </div>
-                            <div class="progress mt-1 mb-3" style="height: 6px; background-color: rgba(255, 255, 255, 0.5); border-radius:10px;">
-                                <div class="progress-bar bg-primary" style="width: ${(joinedCount / totalSpots) * 100}%; border-radius:10px;"></div>
-                            </div>
-                            
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-secondary flex-grow-1 btn-details-trigger py-2 fw-bold" data-match-id="${matchId}" style="border-radius:8px; background-color: rgba(255, 255, 255, 0.75); border: 1px solid rgba(0,0,0,0.06); color: var(--text-primary);">
-                                    View Details
-                                </button>
-                                ${actionBtnHtml}
-                            </div>`;
-                        container.appendChild(card);
-                    });
-
-                    container.querySelectorAll('.btn-details-trigger').forEach(btn => {
-                        btn.onclick = () => {
-                            showSection('match-details-section', { matchId: btn.dataset.matchId });
-                        };
-                    });
-                    container.querySelectorAll('.btn-join-trigger').forEach(btn => {
-                        btn.onclick = () => {
-                            showSection('position-selector-section', { matchId: btn.dataset.matchId });
-                        };
-                    });
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-secondary flex-grow-1 btn-details-trigger py-2 fw-bold" data-match-id="${matchId}" style="border-radius:8px; background-color: rgba(255, 255, 255, 0.75); border: 1px solid rgba(0,0,0,0.06); color: var(--text-primary);">
+                                View Details
+                            </button>
+                            ${actionBtnHtml}
+                        </div>`;
+                    container.appendChild(card);
                 });
-            } catch(e) { 
-                container.innerHTML = `<p class="text-center text-danger p-5">Failed to fetch matches.</p>`; 
-            }
+
+                container.querySelectorAll('.btn-details-trigger').forEach(btn => {
+                    btn.onclick = () => {
+                        showSection('match-details-section', { matchId: btn.dataset.matchId });
+                    };
+                });
+                container.querySelectorAll('.btn-join-trigger').forEach(btn => {
+                    btn.onclick = () => {
+                        showSection('position-selector-section', { matchId: btn.dataset.matchId });
+                    };
+                });
+            } catch(e) { container.innerHTML = `<p class="text-center text-danger p-5">Failed to fetch matches.</p>`; }
         }
 
         async function loadMyJoinedMatches() {
@@ -2745,6 +2635,15 @@
                 loadSuccessSection();
             }
             else if (sectionId === 'login-section') {
+                // Apply dynamic logo image from Database if present
+                const loginLogoEl = getElement('loginLogoEl');
+                const loginLogoFallback = getElement('loginLogoFallback');
+                if (loginLogoEl && appSettings.userAppLogoUrl) {
+                    loginLogoEl.src = appSettings.userAppLogoUrl;
+                    loginLogoEl.style.display = 'inline-block';
+                    if (loginLogoFallback) loginLogoFallback.style.display = 'none';
+                }
+
                 getElement('loginEmailBtnEl').onclick = async () => {
                     const email = getElement('loginEmailInputEl').value;
                     const pass = getElement('loginPasswordInputEl').value;
@@ -2756,43 +2655,15 @@
                     }
                     finally { showLoader(false); }
                 };
-
                 getElement('signupEmailBtnEl').onclick = async () => {
-                    const name = getElement('signupFirstNameInputEl').value.trim();
-                    const lastName = getElement('signupLastNameInputEl').value.trim();
-                    const username = getElement('signupUsernameInputEl').value.trim();
-                    const phone = getElement('signupPhoneInputEl').value.trim();
-                    const email = getElement('signupEmailInputEl').value.trim();
+                    const name = getElement('signupNameInputEl').value;
+                    const email = getElement('signupEmailInputEl').value;
                     const pass = getElement('signupPasswordInputEl').value;
-                    const refCode = getElement('signupReferralInputEl') ? getElement('signupReferralInputEl').value.trim() : "";
-                    
-                    if(!name || !lastName || !username || !phone || !email || !pass) return showStatusMessage('signupStatusMessageEl', 'Please fill all fields.');
-                    if(phone.length !== 10 || isNaN(phone)) return showStatusMessage('signupStatusMessageEl', 'Please enter a valid 10-digit phone number.');
-                    
+                    if(!name || !email || !pass) return showStatusMessage('signupStatusMessageEl', 'Please fill all fields.');
                     showLoader(true);
                     try { 
                         const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                        const fullName = name + " " + lastName;
-                        await set(ref(db, `users/${cred.user.uid}`), { 
-                            uid: cred.user.uid, 
-                            displayName: fullName, 
-                            username: username,
-                            phone: phone, 
-                            email: email, 
-                            referralCode: refCode,
-                            balance: 0, 
-                            totalKills: 0, 
-                            totalWon: 0, 
-                            createdAt: serverTimestamp() 
-                        });
-                        
-                        await set(ref(db, `leaderboard/${cred.user.uid}`), {
-                            uid: cred.user.uid,
-                            displayName: fullName,
-                            balance: 0,
-                            totalWon: 0,
-                            profilePicUrl: ""
-                        });
+                        await set(ref(db, `users/${cred.user.uid}`), { uid: cred.user.uid, displayName: name, email: email, balance: 0, totalKills: 0, totalWon: 0, createdAt: serverTimestamp() });
                     } 
                     catch (e) { 
                         const friendlyMsg = getFriendlyAuthErrorMessage(e.code);
@@ -2802,22 +2673,6 @@
                 };
                 getElement('showSignupToggleBtnEl').onclick = () => { getElement('emailLoginForm').style.display = 'none'; getElement('emailSignupForm').style.display = 'block'; };
                 getElement('showLoginToggleBtnEl').onclick = () => { getElement('emailLoginForm').style.display = 'block'; getElement('emailSignupForm').style.display = 'none'; };
-                
-                const googleBtn = getElement('loginGoogleBtnEl');
-                if (googleBtn) {
-                    googleBtn.onclick = async () => {
-                        showLoader(true);
-                        const provider = new GoogleAuthProvider();
-                        try {
-                            await signInWithPopup(auth, provider);
-                        } catch (e) {
-                            const friendlyMsg = getFriendlyAuthErrorMessage(e.code);
-                            showStatusMessage('loginStatusMessageEl', friendlyMsg);
-                        } finally {
-                            showLoader(false);
-                        }
-                    };
-                }
             }
             else if (sectionId === 'profile-section') {
                 populateProfilePage(userProfile);
@@ -2844,7 +2699,6 @@
                             const profilePicUrl = await uploadImageToImgBB(file);
                             
                             await set(ref(db, `users/${currentUser.uid}/profilePicUrl`), profilePicUrl);
-                            await set(ref(db, `leaderboard/${currentUser.uid}/profilePicUrl`), profilePicUrl);
                             showToast("Profile picture updated successfully!");
                         } catch (err) {
                             showToast("Upload failed: " + err.message);
@@ -3234,16 +3088,18 @@
             });
         }
         
-        // Clean flat 2.5 second splash display
+        // 2 SECONDS MINIMUM SPLASH TIME TO ALLOW QUICK LAUNCH
         setTimeout(() => {
-            const loaderEl = getElement('globalLoaderEl');
-            if (loaderEl) {
-                loaderEl.style.opacity = '0';
-                loaderEl.style.visibility = 'hidden';
-                setTimeout(() => {
-                    loaderEl.style.display = 'none';
-                }, 500);
-            }
+            splashMinTimePassed = true;
+            checkAndHideSplash();
+        }, 2000);
+
+        // FAIL-SAFE MAX OVERLAY TIMEOUT: FORCES OVERLAY TO FADE OUT AFTER EXACTLY 2.5 SECONDS NO MATTER WHAT
+        setTimeout(() => {
+            splashMinTimePassed = true;
+            appInitialized = true;
+            splashImageProcessed = true;
+            checkAndHideSplash();
         }, 2500);
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -3254,10 +3110,11 @@
             const cachedSplashUrl = localStorage.getItem('cachedSplashImageUrl');
             if (cachedSplashUrl) {
                 const splashImg = getElement('splashScreenImg');
-                if (splashImg) {
+                const defaultSpinner = getElement('splashDefaultSpinner');
+                if (splashImg && defaultSpinner) {
                     splashImg.src = cachedSplashUrl;
                     splashImg.style.display = 'block';
-                    splashImageProcessed = true;
+                    defaultSpinner.style.display = 'none';
                 }
             }
             
