@@ -153,11 +153,18 @@
             justify-content: center; 
             align-items: center; 
         }
+        
+        /* FIX SLIDER LINK AND IMAGE STRETCH TO REMOVE WHITE SPACES */
+        .swiper-slide a {
+            display: block !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
         .swiper-slide img { 
-            display: block; 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
+            display: block !important; 
+            width: 100% !important; 
+            height: 100% !important; 
+            object-fit: cover !important; 
         }
         .swiper-pagination-bullet { 
             background-color: rgba(0, 0, 0, 0.25) !important; 
@@ -289,12 +296,6 @@
         .leaderboard-table th { background-color: var(--bg-primary); color: var(--text-secondary); border-bottom: 2px solid var(--border-color); }
         .leaderboard-table td { background-color: transparent; border-bottom: 1px solid var(--border-color); color: var(--text-primary); padding: 12px 8px; }
         
-        /* POPUP MODAL */
-        .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 1rem; }
-        .modal-content { background: var(--bg-secondary); border: 2px solid var(--accent-primary); border-radius: 16px; padding: 1.5rem; max-width: 420px; width: 100%; position: relative; box-shadow: 0 4px 25px rgba(37, 99, 235, 0.15); }
-        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 1.6rem; color: var(--text-secondary); cursor: pointer; }
-        .close-modal:hover { color: var(--text-primary); }
-
         /* UNIFIED SPLASH SCREEN OVERLAY */
         #globalLoaderEl { 
             background: #000000 !important; /* Pure Black Background for Splash Screen */
